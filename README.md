@@ -1,4 +1,5 @@
 # roop for StableDiffusion
+### 'NSFW filter OFF' version (use it at your own responsibility)
 
 This is an extension for StableDiffusion's [AUTOMATIC1111 web-ui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/) that allows face-replacement in images. It is based on [roop](https://github.com/s0md3v/roop) but will be developed seperately.
 
@@ -33,8 +34,8 @@ Use the "Restore Face" option. You can also try the "Upscaler" option or for mor
 ### There are multiple faces in result
 Select the face numbers you wish to swap using the "Comma separated face number(s)" option.
 
-### The result is totally black
-This means roop detected that your image is NSFW.
+### ~~The result is totally black~~
+~~This means roop detected that your image is NSFW.~~
 
 ### Img2Img
 
