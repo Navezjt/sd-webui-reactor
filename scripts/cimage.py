@@ -15,7 +15,6 @@ def numpy_to_pil(images: np.ndarray) -> List[Image.Image]:
 
 
 def check_image(x_image: np.ndarray) -> Tuple[np.ndarray, List[bool]]:
-    global safety_feature_extractor, safety_checker
     return x_image, False
 
 
