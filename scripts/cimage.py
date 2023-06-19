@@ -23,7 +23,3 @@ def check_batch(x: torch.Tensor) -> torch.Tensor:
     x_checked_image = x_samples_ddim_numpy
     x = torch.from_numpy(x_checked_image).permute(0, 3, 1, 2)
     return x
-
-
-def convert_to_sd(img: Image) -> Image:
-    return img

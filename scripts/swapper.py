@@ -11,7 +11,6 @@ from PIL import Image
 
 import insightface
 import onnxruntime
-from scripts.cimage import convert_to_sd
 
 from modules.face_restoration import FaceRestoration, restore_faces
 from modules.upscaler import Upscaler, UpscalerData
@@ -27,10 +26,6 @@ class UpscaleOptions:
     upscale_visibility: float = 0.5
     face_restorer: FaceRestoration = None
     restorer_visibility: float = 0.5
-
-
-def save_image(img: Image, filename: str):
-    convert_to_sd(img).save(filename)
 
 
 def cosine_distance(vector1: np.ndarray, vector2: np.ndarray) -> float:
@@ -162,8 +157,7 @@ def swap_face(
             if upscale_options is not None:
                 result_image = upscale_image(result_image, upscale_options)
 
-            # save_image(result_image, fn.name)
         else:
             logger.info("No source face found")
-    save_image(result_image, fn.name)
+    result_image.save(fn.name)
     return ImageResult(path=fn.name)
