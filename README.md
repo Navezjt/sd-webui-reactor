@@ -37,6 +37,8 @@ Select the face numbers you wish to swap using the "Comma separated face number(
 ### ~~The result is totally black~~
 ~~This means roop detected that your image is NSFW.~~
 
+<img src="https://github.com/Gourieff/sd-webui-roop-nsfw/raw/main/example/IamSFW.jpg" alt="IamSFW" width="50%"/>
+
 ### Img2Img
 
 You can choose to activate the swap on the source image or on the generated image, or on both using the checkboxes. Activating on source image allows you to start from a given base and apply the diffusion process to it.
