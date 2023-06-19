@@ -27,8 +27,6 @@ if not os.path.exists(models_dir):
 if not os.path.exists(model_path):
     download(model_url, model_path)
 
-print("Checking nsfw-roop requirements...")
-
 with open(req_file) as file:
     for package in file:
         try:
@@ -52,5 +50,5 @@ with open(req_file) as file:
             print(e)
             print(f"Warning: Failed to install {package}, nsfw-roop will not work.")
             raise e
-        finally:
-            print(f'{package} - ok')
+        # finally:
+        #     print(f'{package} - ok')
