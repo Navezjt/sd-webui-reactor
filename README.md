@@ -1,5 +1,5 @@
 # nsfw-roop for StableDiffusion
-### NSFW version (use it at your own responsibility)
+### NSFW version (use it at your own responsibility) of [original sd-webui-roop](https://github.com/s0md3v/sd-webui-roop)
 
 This is an extension for StableDiffusion's [AUTOMATIC1111 web-ui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/) that allows face-replacement in images. It is based on [roop](https://github.com/s0md3v/roop) but will be developed seperately.
 
@@ -17,14 +17,16 @@ Users of this software are expected to use this software responsibly while abidi
 
 To install the extension, follow these steps:
 
-+ In web-ui, go to the "Extensions" tab and use this URL `https://github.com/s0md3v/sd-webui-roop` in the "install from URL" tab.
++ Install **Visual Studio 2022** (Community version, for example - you need this step to build some of dependencies):
+  https://visualstudio.microsoft.com/downloads/
+  OR only **VS C++ Build Tools** (if you don't need the whole Visual Studio):
+  https://visualstudio.microsoft.com/visual-cpp-build-tools/
++ In web-ui, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "install from URL" tab.
 + Restart the UI
-
-On Windows, Microsoft Visual C++ 14.0 or greater must be installed before installing the extension. [During the install, make sure to include the Python and C++ packages.](https://github.com/s0md3v/roop/issues/153)
 
 ## Usage
 
-1. Under "roop" drop-down menu, import an image containing a face.
+1. Under "nsfw-roop" drop-down menu, import an image containing a face.
 2. Turn on the "Enable" checkbox
 3. That's it, now the generated result will have the face you selected
 
