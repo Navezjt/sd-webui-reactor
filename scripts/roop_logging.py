@@ -24,7 +24,7 @@ class ColoredFormatter(logging.Formatter):
 
 
 # Create a new logger
-logger = logging.getLogger("roop")
+logger = logging.getLogger("nsfw-roop")
 logger.propagate = False
 
 # Add handler if we don't have one.
