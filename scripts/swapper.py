@@ -14,9 +14,19 @@ import onnxruntime
 from scripts.cimage import convert_to_sd
 
 from modules.face_restoration import FaceRestoration, restore_faces
+from modules.upscaler import Upscaler, UpscalerData
 from scripts.roop_logging import logger
 
 providers = onnxruntime.get_available_providers()
+
+
+@dataclass
+class UpscaleOptions:
+    scale: int = 1
+    upscaler: UpscalerData = None
+    upscale_visibility: float = 0.5
+    face_restorer: FaceRestoration = None
+    restorer_visibility: float = 0.5
 
 
 def save_image(img: Image, filename: str):
@@ -67,6 +77,36 @@ def getFaceSwapModel(model_path: str):
     return FS_MODEL
 
 
+def upscale_image(image: Image, upscale_options: UpscaleOptions):
+    result_image = image
+    if upscale_options.upscaler is not None and upscale_options.upscaler.name != "None":
+        original_image = result_image.copy()
+        logger.info(
+            "Upscale with %s scale = %s",
+            upscale_options.upscaler.name,
+            upscale_options.scale,
+        )
+        result_image = upscale_options.upscaler.scaler.upscale(
+            image, upscale_options.scale, upscale_options.upscaler.data_path
+        )
+        if upscale_options.scale == 1:
+            result_image = Image.blend(
+                original_image, result_image, upscale_options.upscale_visibility
+            )
+
+    if upscale_options.face_restorer is not None:
+        original_image = result_image.copy()
+        logger.info("Restore face with %s", upscale_options.face_restorer.name())
+        numpy_image = np.array(result_image)
+        numpy_image = upscale_options.face_restorer.restore(numpy_image)
+        restored_image = Image.fromarray(numpy_image)
+        result_image = Image.blend(
+            original_image, restored_image, upscale_options.restorer_visibility
+        )
+
+    return result_image
+
+
 def get_face_single(img_data: np.ndarray, face_index=0, det_size=(640, 640)):
     face_analyser = copy.deepcopy(getAnalysisModel())
     face_analyser.prepare(ctx_id=0, det_size=det_size)
@@ -98,7 +138,9 @@ def swap_face(
     target_img: Image.Image,
     model: Union[str, None] = None,
     faces_index: Set[int] = {0},
+    upscale_options: Union[UpscaleOptions, None] = None,
 ) -> ImageResult:
+    result_image = target_img
     fn = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
     if model is not None:
         source_img = cv2.cvtColor(np.array(source_img), cv2.COLOR_RGB2BGR)
@@ -117,8 +159,11 @@ def swap_face(
                     logger.info(f"No target face found for {face_num}")
 
             result_image = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
+            if upscale_options is not None:
+                result_image = upscale_image(result_image, upscale_options)
 
-            save_image(result_image, fn.name)
+            # save_image(result_image, fn.name)
         else:
             logger.info("No source face found")
+    save_image(result_image, fn.name)
     return ImageResult(path=fn.name)
