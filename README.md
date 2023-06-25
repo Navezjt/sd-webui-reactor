@@ -1,5 +1,5 @@
 # nsfw-roop for StableDiffusion
-### NSFW version (use it at your own responsibility) of [original sd-webui-roop](https://github.com/s0md3v/sd-webui-roop)
+### NSFW version (use it on your own responsibility) of [original sd-webui-roop](https://github.com/s0md3v/sd-webui-roop)
 
 This is an extension for StableDiffusion's [AUTOMATIC1111 web-ui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/) that allows face-replacement in images. It is based on [roop](https://github.com/s0md3v/roop) but will be developed seperately.
 
@@ -39,7 +39,7 @@ Select the face numbers you wish to swap using the "Comma separated face number(
 ### ~~The result is totally black~~
 ~~This means roop detected that your image is NSFW.~~
 
-<img src="https://github.com/Gourieff/sd-webui-roop-nsfw/raw/main/example/IamSFW.jpg" alt="IamSFW" width="50%"/>
+<img src="example/IamSFW.jpg" alt="IamSFW" width="50%"/>
 
 ### Img2Img
 
