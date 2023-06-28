@@ -1,5 +1,5 @@
 # nsfw-roop for StableDiffusion
-### NSFW version (use it on your own responsibility) of [original sd-webui-roop](https://github.com/s0md3v/sd-webui-roop)
+### NSFW (uncensored) version (use it on your own responsibility) of [original sd-webui-roop](https://github.com/s0md3v/sd-webui-roop)
 
 This is an extension for StableDiffusion's [AUTOMATIC1111 web-ui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/) that allows face-replacement in images. It is based on [roop](https://github.com/s0md3v/roop) but will be developed seperately.
 
