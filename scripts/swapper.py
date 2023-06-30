@@ -120,7 +120,8 @@ def swap_face(
     source_img: Image.Image,
     target_img: Image.Image,
     model: Union[str, None] = None,
-    faces_index: Set[int] = {0},
+    source_faces_index: List[int] = [0],
+    faces_index: List[int] = [0],
     upscale_options: Union[UpscaleOptions, None] = None,
 ) -> ImageResult:
     result_image = target_img
@@ -128,24 +129,35 @@ def swap_face(
     if model is not None:
         source_img = cv2.cvtColor(np.array(source_img), cv2.COLOR_RGB2BGR)
         target_img = cv2.cvtColor(np.array(target_img), cv2.COLOR_RGB2BGR)
-        source_face = get_face_single(source_img, face_index=0)
-        if source_face is not None:
+        source_face = get_face_single(source_img, face_index=source_faces_index[0])
+        if len(source_faces_index) != 0 and len(source_faces_index) != 1 and len(source_faces_index) != len(faces_index):
+            logger.info(f'Source Faces must have no entries (default=0), one entry, or same number of entries as target faces.')
+        elif source_face is not None:
             result = target_img
             model_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), model)
             face_swapper = getFaceSwapModel(model_path)
 
+            source_face_idx = 0
+
             for face_num in faces_index:
-                target_face = get_face_single(target_img, face_index=face_num)
-                if target_face is not None:
-                    result = face_swapper.get(result, target_face, source_face)
+                if len(source_faces_index) > 1 and source_face_idx > 0:
+                    source_face = get_face_single(source_img, face_index=source_faces_index[source_face_idx])
+                source_face_idx += 1
+
+                if source_face is not None:
+                    target_face = get_face_single(target_img, face_index=face_num)
+                    if target_face is not None:
+                        result = face_swapper.get(result, target_face, source_face)
+                    else:
+                        logger.info(f"No target face found for {face_num}")
                 else:
-                    logger.info(f"No target face found for {face_num}")
+                    logger.info(f"No source face found for face number {source_face_idx}.")
 
             result_image = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
             if upscale_options is not None:
                 result_image = upscale_image(result_image, upscale_options)
 
         else:
-            logger.info("No source face found")
+            logger.info("No source face(s) found")
     result_image.save(fn.name)
     return ImageResult(path=fn.name)

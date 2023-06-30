@@ -36,10 +36,15 @@ class FaceSwapScript(scripts.Script):
             with gr.Column():
                 img = gr.inputs.Image(type="pil")
                 enable = gr.Checkbox(False, placeholder="enable", label="Enable")
+                source_faces_index = gr.Textbox(
+                    value="0",
+                    placeholder="Which face(s) to use as source (comma separated)",
+                    label="Comma separated face number(s) from swap-source image (above)",
+                )
                 faces_index = gr.Textbox(
                     value="0",
-                    placeholder="Which face to swap (comma separated), start from 0",
-                    label="Comma separated face number(s)",
+                    placeholder="Which face to swap (comma separated)",
+                    label="Comma separated face number(s) for target image (result)",
                 )
                 with gr.Row():
                     face_restorer_name = gr.Radio(
@@ -90,6 +95,7 @@ class FaceSwapScript(scripts.Script):
         return [
             img,
             enable,
+            source_faces_index,
             faces_index,
             model,
             face_restorer_name,
@@ -130,6 +136,7 @@ class FaceSwapScript(scripts.Script):
         p: StableDiffusionProcessing,
         img,
         enable,
+        source_faces_index,
         faces_index,
         model,
         face_restorer_name,
@@ -149,11 +156,16 @@ class FaceSwapScript(scripts.Script):
         self.upscaler_name = upscaler_name       
         self.swap_in_generated = swap_in_generated
         self.model = model
-        self.faces_index = {
+        self.source_faces_index = [
+            int(x) for x in source_faces_index.strip(",").split(",") if x.isnumeric()
+        ]
+        self.faces_index = [
             int(x) for x in faces_index.strip(",").split(",") if x.isnumeric()
-        }
+        ]
+        if len(self.source_faces_index) == 0:
+            self.source_faces_index = [0]
         if len(self.faces_index) == 0:
-            self.faces_index = {0}
+            self.faces_index = [0]
         if self.enable:
             if self.source is not None:
                 if isinstance(p, StableDiffusionProcessingImg2Img) and swap_in_source:
@@ -164,6 +176,7 @@ class FaceSwapScript(scripts.Script):
                         result = swap_face(
                             self.source,
                             p.init_images[i],
+                            source_faces_index=self.source_faces_index,
                             faces_index=self.faces_index,
                             model=self.model,
                             upscale_options=self.upscale_options,
@@ -183,6 +196,7 @@ class FaceSwapScript(scripts.Script):
                 result: ImageResult = swap_face(
                     self.source,
                     image,
+                    source_faces_index=self.source_faces_index,
                     faces_index=self.faces_index,
                     model=self.model,
                     upscale_options=self.upscale_options,
