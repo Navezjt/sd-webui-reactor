@@ -60,7 +60,6 @@ class FaceSwapScript(scripts.Script):
                     True,
                     placeholder="Restore face, then Upscale",
                     label="1. Restore face -> 2. Upscale (-Uncheck- if you want vice versa)",
-                    visible=is_img2img,
                 )
                 upscaler_name = gr.inputs.Dropdown(
                     choices=[upscaler.name for upscaler in shared.sd_upscalers],
