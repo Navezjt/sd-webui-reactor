@@ -58,7 +58,7 @@ class FaceSwapScript(scripts.Script):
                     )
                 restore_first = gr.Checkbox(
                     True,
-                    placeholder="Restore face, than Upscale",
+                    placeholder="Restore face, then Upscale",
                     label="1. Restore face -> 2. Upscale (-Uncheck- if you want vice versa)",
                     visible=is_img2img,
                 )
