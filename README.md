@@ -32,9 +32,14 @@ To install the extension, follow these steps:
 
 ### The result face is blurry
 Use the "Restore Face" option. You can also try the "Upscaler" option or for more finer control, use an upscaler from the "Extras" tab.
+You can also set the postproduction order (from 0.1.0 version):
+<img src="example/pp-order.png" alt="example"/>
+
+*The old logic was the opposite (Upscale -> then Restore), resulting in worse face quality (and big texture differences) after upscaling.* 
 
 ### There are multiple faces in result
-Select the face numbers you wish to swap using the "Comma separated face number(s)" option.
+Select the face numbers you wish to swap using the "Comma separated face number(s)" option for swap-source and result images. You can use different index order.
+<img src="example/multiple-faces.png" alt="example"/>
 
 ### ~~The result is totally black~~
 ~~This means roop detected that your image is NSFW.~~
