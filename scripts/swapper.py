@@ -21,6 +21,7 @@ providers = onnxruntime.get_available_providers()
 
 @dataclass
 class UpscaleOptions:
+    do_restore_first: bool = True
     scale: int = 1
     upscaler: UpscalerData = None
     upscale_visibility: float = 0.5
@@ -62,30 +63,54 @@ def getFaceSwapModel(model_path: str):
 
 def upscale_image(image: Image, upscale_options: UpscaleOptions):
     result_image = image
-    if upscale_options.upscaler is not None and upscale_options.upscaler.name != "None":
-        original_image = result_image.copy()
-        logger.info(
-            "Upscale with %s scale = %s",
-            upscale_options.upscaler.name,
-            upscale_options.scale,
-        )
-        result_image = upscale_options.upscaler.scaler.upscale(
-            image, upscale_options.scale, upscale_options.upscaler.data_path
-        )
-        if upscale_options.scale == 1:
+    if upscale_options.do_restore_first:
+        if upscale_options.face_restorer is not None:
+            original_image = result_image.copy()
+            logger.info("1. Restore face with %s", upscale_options.face_restorer.name())
+            numpy_image = np.array(result_image)
+            numpy_image = upscale_options.face_restorer.restore(numpy_image)
+            restored_image = Image.fromarray(numpy_image)
             result_image = Image.blend(
-                original_image, result_image, upscale_options.upscale_visibility
+                original_image, restored_image, upscale_options.restorer_visibility
             )
-
-    if upscale_options.face_restorer is not None:
-        original_image = result_image.copy()
-        logger.info("Restore face with %s", upscale_options.face_restorer.name())
-        numpy_image = np.array(result_image)
-        numpy_image = upscale_options.face_restorer.restore(numpy_image)
-        restored_image = Image.fromarray(numpy_image)
-        result_image = Image.blend(
-            original_image, restored_image, upscale_options.restorer_visibility
-        )
+        if upscale_options.upscaler is not None and upscale_options.upscaler.name != "None":
+            original_image = result_image.copy()
+            logger.info(
+                "2. Upscale with %s scale = %s",
+                upscale_options.upscaler.name,
+                upscale_options.scale,
+            )
+            result_image = upscale_options.upscaler.scaler.upscale(
+                original_image, upscale_options.scale, upscale_options.upscaler.data_path
+            )
+            if upscale_options.scale == 1:
+                result_image = Image.blend(
+                    original_image, result_image, upscale_options.upscale_visibility
+                )
+    else:
+        if upscale_options.upscaler is not None and upscale_options.upscaler.name != "None":
+            original_image = result_image.copy()
+            logger.info(
+                "1. Upscale with %s scale = %s",
+                upscale_options.upscaler.name,
+                upscale_options.scale,
+            )
+            result_image = upscale_options.upscaler.scaler.upscale(
+                image, upscale_options.scale, upscale_options.upscaler.data_path
+            )
+            if upscale_options.scale == 1:
+                result_image = Image.blend(
+                    original_image, result_image, upscale_options.upscale_visibility
+                )
+        if upscale_options.face_restorer is not None:
+            original_image = result_image.copy()
+            logger.info("2. Restore face with %s", upscale_options.face_restorer.name())
+            numpy_image = np.array(result_image)
+            numpy_image = upscale_options.face_restorer.restore(numpy_image)
+            restored_image = Image.fromarray(numpy_image)
+            result_image = Image.blend(
+                original_image, restored_image, upscale_options.restorer_visibility
+            )
 
     return result_image
 

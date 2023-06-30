@@ -26,13 +26,13 @@ def get_models():
 
 class FaceSwapScript(scripts.Script):
     def title(self):
-        return f"nsfw-roop"
+        return f"NSFW-Roop"
 
     def show(self, is_img2img):
         return scripts.AlwaysVisible
 
     def ui(self, is_img2img):
-        with gr.Accordion(f"nsfw-roop {version_flag}", open=False):
+        with gr.Accordion(f"NSFW-Roop {version_flag}", open=False):
             with gr.Column():
                 img = gr.inputs.Image(type="pil")
                 enable = gr.Checkbox(False, placeholder="enable", label="Enable")
@@ -56,6 +56,12 @@ class FaceSwapScript(scripts.Script):
                     face_restorer_visibility = gr.Slider(
                         0, 1, 1, step=0.1, label="Restore visibility"
                     )
+                restore_first = gr.Checkbox(
+                    True,
+                    placeholder="Restore face, than Upscale",
+                    label="1. Restore face -> 2. Upscale (-Uncheck- if you want vice versa)",
+                    visible=is_img2img,
+                )
                 upscaler_name = gr.inputs.Dropdown(
                     choices=[upscaler.name for upscaler in shared.sd_upscalers],
                     label="Upscaler",
@@ -100,12 +106,14 @@ class FaceSwapScript(scripts.Script):
             model,
             face_restorer_name,
             face_restorer_visibility,
+            restore_first,
             upscaler_name,
             upscaler_scale,
             upscaler_visibility,
             swap_in_source,
             swap_in_generated,
         ]
+
 
     @property
     def upscaler(self) -> UpscalerData:
@@ -124,6 +132,7 @@ class FaceSwapScript(scripts.Script):
     @property
     def upscale_options(self) -> UpscaleOptions:
         return UpscaleOptions(
+            do_restore_first = self.restore_first,
             scale=self.upscaler_scale,
             upscaler=self.upscaler,
             face_restorer=self.face_restorer,
@@ -141,6 +150,7 @@ class FaceSwapScript(scripts.Script):
         model,
         face_restorer_name,
         face_restorer_visibility,
+        restore_first,
         upscaler_name,
         upscaler_scale,
         upscaler_visibility,
@@ -153,6 +163,7 @@ class FaceSwapScript(scripts.Script):
         self.upscaler_visibility = upscaler_visibility
         self.face_restorer_visibility = face_restorer_visibility
         self.enable = enable
+        self.restore_first = restore_first
         self.upscaler_name = upscaler_name       
         self.swap_in_generated = swap_in_generated
         self.model = model
@@ -169,7 +180,7 @@ class FaceSwapScript(scripts.Script):
         if self.enable:
             if self.source is not None:
                 if isinstance(p, StableDiffusionProcessingImg2Img) and swap_in_source:
-                    logger.info(f"nsfw-roop enabled, face index %s", self.faces_index)
+                    logger.info(f"NSFW-Roop is enabled, face index %s", self.faces_index)
 
                     for i in range(len(p.init_images)):
                         logger.info(f"Swap in source %s", i)
