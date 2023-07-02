@@ -78,4 +78,4 @@ Please, check the path where "inswapper_128.onnx" model is stored. It must be in
 
 ## Updating
 
-A good and quick way to check for Extensions updates: https://github.com/Gourieff/sd-webui-extension-updater
+A good and quick way to check for Extensions updates: https://github.com/Gourieff/sd-webui-extensions-updater
