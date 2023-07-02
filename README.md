@@ -56,7 +56,7 @@ Inpainting should work but only the masked part will be swapped.
 
 **I. "You should at least have one model in models directory"**
 
-Please, check the path where "inswapper_128.onnx" model is stored. It must be inside the folder `stable-diffusion-webui\models\roop`. Move the model there if it's sotred in a different directory.
+Please, check the path where "inswapper_128.onnx" model is stored. It must be inside the folder `stable-diffusion-webui\models\roop`. Move the model there if it's stored in a different directory.
 
 **II. Any problems with installing Insightface or other dependencies**
 
