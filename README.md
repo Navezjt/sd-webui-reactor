@@ -17,12 +17,12 @@ Users of this software are expected to use this software responsibly while abidi
 
 To install the extension, follow these steps:
 
-+ Install **Visual Studio 2022** (Community version, for example - you need this step to build some of dependencies):
++ (For Windows Users) Install **Visual Studio 2022** (Community version, for example - you need this step to build some of dependencies):
   https://visualstudio.microsoft.com/downloads/
   OR only **VS C++ Build Tools** (if you don't need the whole Visual Studio):
   https://visualstudio.microsoft.com/visual-cpp-build-tools/
-+ In web-ui, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "install from URL" tab.
-+ Restart the UI
++ In web-ui, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "Install from URL" tab.
++ Go to the "Installed" tab and click "Restart the UI"
 
 ## Usage
 
