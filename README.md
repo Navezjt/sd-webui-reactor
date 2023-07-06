@@ -76,6 +76,10 @@ Please, check the path where "inswapper_128.onnx" model is stored. It must be in
    - `pip install tqdm`
 7. Type `deacticate`, you can close your Terminal or Console and start your sd-webui, Roop should start OK - if not, welcome to Issues section.
 
+**III. "TypeError: UpscaleOptions.init() got an unexpected keyword argument 'do_restore_first'"**
+
+The solution is here: https://github.com/Gourieff/sd-webui-roop-nsfw/issues/3
+
 ## Updating
 
 A good and quick way to check for Extensions updates: https://github.com/Gourieff/sd-webui-extensions-updater
