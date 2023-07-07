@@ -73,7 +73,7 @@ Please, check the path where "inswapper_128.onnx" model is stored. It must be in
    
 (for Any OS Users) If the problem still there, then do the following:
 1. Go to `stable-diffusion-webui\venv\Lib\site-packages` folder (or it can be `stable-diffusion-webui/venv/lib/python3.10/site-packages`)
-2. If you see any folders the with names start from `~` (ex. "~rotobuf") - delete them
+2. If you see any folders with names start from `~` (ex. "~rotobuf") - delete them
 3. Go to `stable-diffusion-webui\venv\Scripts` or `stable-diffusion-webui/venv/bin`
 4. Run Terminal or Console (cmd) for that folder and type `activate`
 5. Update your pip at first: `pip install -U pip`
