@@ -87,7 +87,16 @@ Please, check the path where "inswapper_128.onnx" model is stored. It must be in
 
 **III. "TypeError: UpscaleOptions.init() got an unexpected keyword argument 'do_restore_first'"**
 
-The solution is here: https://github.com/Gourieff/sd-webui-roop-nsfw/issues/3
+First of all - you need to disable any other Roop extensions:
+- Go to 'Extensions -> Installed' tab and uncheck any Roop except this one
+  <img src="example/roop-off.png" alt="uncompatible-with-other-roop"/>
+- Click 'Apply and restart UI'
+
+Alternative solution is here: https://github.com/Gourieff/sd-webui-roop-nsfw/issues/3
+
+**IV. "AttributeError: 'FaceSwapScript' object has no attribute 'enable'"**
+
+You need to disable the "SD-CN-Animation" extention
 
 ## Updating
 
