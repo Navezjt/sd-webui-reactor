@@ -70,6 +70,7 @@ Please, check the path where "inswapper_128.onnx" model is stored. It must be in
 
 (for Windows Users) If you have VS C++ Build Tools or MS VS 2022 installed but still have a problem, then try the next step:
 1. Close your sd-webui and start it again
+   
 (for Any OS Users) If the problem still there, then do the following:
 1. Go to `stable-diffusion-webui\venv\Lib\site-packages` folder (or it can be `stable-diffusion-webui/venv/lib/python3.10/site-packages`)
 2. If you see any folders the with names start from `~` (ex. "~rotobuf") - delete them
@@ -82,7 +83,7 @@ Please, check the path where "inswapper_128.onnx" model is stored. It must be in
    - `pip install opencv-python==4.7.0.72`
    - `pip install diffusers==0.17.1`
    - `pip install tqdm`
-7. Type `deacticate`, you can close your Terminal or Console and start your sd-webui, Roop should start OK - if not, welcome to Issues section.
+7. Type `deactivate`, you can close your Terminal or Console and start your sd-webui, Roop should start OK - if not, welcome to Issues section.
 
 **III. "TypeError: UpscaleOptions.init() got an unexpected keyword argument 'do_restore_first'"**
 
