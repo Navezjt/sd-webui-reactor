@@ -26,13 +26,13 @@ def get_models():
 
 class FaceSwapScript(scripts.Script):
     def title(self):
-        return f"NSFW-Roop"
+        return f"Roop-GE"
 
     def show(self, is_img2img):
         return scripts.AlwaysVisible
 
     def ui(self, is_img2img):
-        with gr.Accordion(f"NSFW-Roop {version_flag}", open=False):
+        with gr.Accordion(f"Roop-GE {version_flag}", open=False):
             with gr.Column():
                 img = gr.inputs.Image(type="pil")
                 enable = gr.Checkbox(False, placeholder="enable", label="Enable")
@@ -179,7 +179,7 @@ class FaceSwapScript(scripts.Script):
         if self.enable:
             if self.source is not None:
                 if isinstance(p, StableDiffusionProcessingImg2Img) and swap_in_source:
-                    logger.info(f"NSFW-Roop is enabled, face index %s", self.faces_index)
+                    logger.info(f"Roop-GE is enabled, face index %s", self.faces_index)
 
                     for i in range(len(p.init_images)):
                         logger.info(f"Swap in source %s", i)

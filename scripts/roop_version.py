@@ -1,5 +1,5 @@
-version_flag = "v0.1.0"
+version_flag = "v0.2.0"
 
 from scripts.roop_logging import logger
 
-logger.info(f"NSFW-Roop {version_flag}")
+logger.info(f"Roop-GE {version_flag}")

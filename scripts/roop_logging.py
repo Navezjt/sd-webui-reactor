@@ -24,7 +24,7 @@ class ColoredFormatter(logging.Formatter):
 
 
 # Create a new logger
-logger = logging.getLogger("NSFW-Roop")
+logger = logging.getLogger("Roop-GE")
 logger.propagate = False
 
 # Add handler if we don't have one.

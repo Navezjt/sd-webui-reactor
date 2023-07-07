@@ -1,5 +1,7 @@
-# NSFW-Roop 0.1.0 for StableDiffusion
+# Roop-GE 0.2.0 for StableDiffusion
 ### NSFW (uncensored) version (use it on your own responsibility) of [original sd-webui-roop](https://github.com/s0md3v/sd-webui-roop) with a lot of improvements
+
+> GE (Gourieff Edition), aka "NSFW-Roop"
 
 This is an extension for StableDiffusion's [AUTOMATIC1111 web-ui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/) that allows face-replacement in images. It is based on [Roop-GE](https://github.com/Gourieff/Roop-GE).
 
@@ -26,9 +28,15 @@ To install the extension, follow these steps:
 
 ## Usage
 
-1. Under "NSFW-Roop" drop-down menu, import an image containing a face.
-2. Turn on the "Enable" checkbox
-3. That's it, now the generated result will have the face you selected
+1. Under "Roop-GE" drop-down menu, import an image containing a face;
+2. Turn on the "Enable" checkbox;
+3. That's it, now the generated result will have the face you selected.
+
+**You can use Roop-GE with Webui API:**
+1. Check the [SD Web API Wiki](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/API) for how to use API;
+2. Call `requests.get(url=f'{address}/sdapi/v1/script-info')` to find the args that Roop-GE needs;
+3. Define Roop-GE script args and add like this `"alwayson_scripts": {"roop-ge":{"args":args}}` in the payload;
+4. Call the API, there's an [full usage example](./example/api_example.py) in example folder.
 
 ### The result face is blurry
 Use the "Restore Face" option. You can also try the "Upscaler" option or for more finer control, use an upscaler from the "Extras" tab.

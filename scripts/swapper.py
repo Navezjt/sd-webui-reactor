@@ -66,7 +66,7 @@ def upscale_image(image: Image, upscale_options: UpscaleOptions):
     if upscale_options.do_restore_first:
         if upscale_options.face_restorer is not None:
             original_image = result_image.copy()
-            logger.info("1. Restore face with %s", upscale_options.face_restorer.name())
+            logger.info("Restore face with %s", upscale_options.face_restorer.name())
             numpy_image = np.array(result_image)
             numpy_image = upscale_options.face_restorer.restore(numpy_image)
             restored_image = Image.fromarray(numpy_image)
@@ -76,7 +76,7 @@ def upscale_image(image: Image, upscale_options: UpscaleOptions):
         if upscale_options.upscaler is not None and upscale_options.upscaler.name != "None":
             original_image = result_image.copy()
             logger.info(
-                "2. Upscale with %s scale = %s",
+                "Upscale with %s scale = %s",
                 upscale_options.upscaler.name,
                 upscale_options.scale,
             )
@@ -91,7 +91,7 @@ def upscale_image(image: Image, upscale_options: UpscaleOptions):
         if upscale_options.upscaler is not None and upscale_options.upscaler.name != "None":
             original_image = result_image.copy()
             logger.info(
-                "1. Upscale with %s scale = %s",
+                "Upscale with %s scale = %s",
                 upscale_options.upscaler.name,
                 upscale_options.scale,
             )
@@ -104,7 +104,7 @@ def upscale_image(image: Image, upscale_options: UpscaleOptions):
                 )
         if upscale_options.face_restorer is not None:
             original_image = result_image.copy()
-            logger.info("2. Restore face with %s", upscale_options.face_restorer.name())
+            logger.info("Restore face with %s", upscale_options.face_restorer.name())
             numpy_image = np.array(result_image)
             numpy_image = upscale_options.face_restorer.restore(numpy_image)
             restored_image = Image.fromarray(numpy_image)
@@ -152,6 +152,20 @@ def swap_face(
     result_image = target_img
     fn = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
     if model is not None:
+
+        if isinstance(source_img, str):  # source_img is a base64 string
+            import base64, io
+            if 'base64,' in source_img:  # check if the base64 string has a data URL scheme
+                # split the base64 string to get the actual base64 encoded image data
+                base64_data = source_img.split('base64,')[-1]
+                # decode base64 string to bytes
+                img_bytes = base64.b64decode(base64_data)
+            else:
+                # if no data URL scheme, just decode
+                img_bytes = base64.b64decode(source_img)
+            
+            source_img = Image.open(io.BytesIO(img_bytes))
+            
         source_img = cv2.cvtColor(np.array(source_img), cv2.COLOR_RGB2BGR)
         target_img = cv2.cvtColor(np.array(target_img), cv2.COLOR_RGB2BGR)
         source_face = get_face_single(source_img, face_index=source_faces_index[0])
