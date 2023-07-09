@@ -3,6 +3,11 @@
 
 > GE (Gourieff Edition), aka "NSFW-Roop"
 
+---
+[**Disclaimer**](#disclaimer) | [**Installation**](#installation) | [**Usage**](#usage) | [**Troubleshooting**](#troubleshooting) | [**Updating**](#updating)
+
+---
+
 This is an extension for StableDiffusion's [AUTOMATIC1111 web-ui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/) that allows face-replacement in images. It is based on [Roop-GE](https://github.com/Gourieff/Roop-GE).
 
 <img src="example/demo_crop.jpg" alt="example"/>
