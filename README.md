@@ -101,7 +101,7 @@ Alternative solution is here: https://github.com/Gourieff/sd-webui-roop-nsfw/iss
 
 **IV. "AttributeError: 'FaceSwapScript' object has no attribute 'enable'"**
 
-You need to disable the "SD-CN-Animation" extention
+You need to disable the "SD-CN-Animation" extension (or perhaps some another that causes the conflict)
 
 ## Updating
 
