@@ -24,12 +24,22 @@ Users of this software are expected to use this software responsibly while abidi
 
 To install the extension, follow these steps:
 
-+ (For Windows Users) Install **Visual Studio 2022** (Community version, for example - you need this step to build some of dependencies):
+1. (For Windows Users) Install **Visual Studio 2022** (Community version, for example - you need this step to build some of dependencies):
   https://visualstudio.microsoft.com/downloads/
   OR only **VS C++ Build Tools** (if you don't need the whole Visual Studio) and select "Desktop Development with C++" under "Workloads -> Desktop & Mobile":
   https://visualstudio.microsoft.com/visual-cpp-build-tools/
-+ In web-ui, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "Install from URL" tab.
-+ Go to the "Installed" tab (*if you have any other Roop extension enabled - disable it, otherwise this extension won't work*), click "Restart the UI"
+2. In web-ui, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "Install from URL" tab
+3. Go to the "Installed" tab (*if you have any other Roop extension enabled - disable it, otherwise this extension won't work*), click "Restart the UI"
+
+If you use [SD.Next](https://github.com/vladmandic/automatic):
+
+1. (For Windows Users) The same 1st step as you see above (VS Studio 2022 or VS C++ Build Tools)
+2. Go to `automatic\venv\Scripts` or `automatic/venv/bin`, run Terminal or Console (cmd) for that folder and type `activate`
+3. Run `pip install insightface==0.7.3`
+4. Run SD.Next, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "Install from URL" tab
+5. Go to the "Installed" tab (*if you have any other Roop extension enabled - disable it, otherwise this extension won't work*), click "Restart the UI"
+6. Stop SD.Next, go to the `automatic\extensions\sd-webui-roop-nsfw` directory - if you see there `models\roop` folder with the file `inswapper_128.onnx`, just move the file to the `automatic\models\roop` folder
+7. Run your SD.Next WebUI
 
 ## Usage
 
@@ -102,6 +112,13 @@ Alternative solution is here: https://github.com/Gourieff/sd-webui-roop-nsfw/iss
 **IV. "AttributeError: 'FaceSwapScript' object has no attribute 'enable'"**
 
 You need to disable the "SD-CN-Animation" extension (or perhaps some another that causes the conflict)
+
+**V. "INVALID_PROTOBUF : Load model from <...>\models/roop\inswapper_128.onnx failed:Protobuf parsing failed"**
+
+This error may occur if there's smth wrong with the model file `inswapper_128.onnx`
+
+Try to download it manually from [here](https://huggingface.co/henryruhs/roop/resolve/main/inswapper_128.onnx)
+and put it to the `stable-diffusion-webui\models\roop` replacing existing one
 
 ## Updating
 
