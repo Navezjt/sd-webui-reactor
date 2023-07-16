@@ -94,6 +94,7 @@ Please, check the path where "inswapper_128.onnx" model is stored. It must be in
 5. Update your pip at first: `pip install -U pip`
 6. Then one-by-one:
    - `pip install insightface==0.7.3`
+   - `pip install onnx==1.14.0`
    - `pip install onnxruntime==1.15.0`
    - `pip install opencv-python==4.7.0.72`
    - `pip install diffusers==0.17.1`
