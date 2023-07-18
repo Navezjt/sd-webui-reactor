@@ -36,6 +36,6 @@ if not logger.handlers:
     logger.addHandler(handler)
 
 # Configure logger
-loglevel_string = getattr(shared.cmd_opts, "controlnet_loglevel", "INFO")
+loglevel_string = getattr(shared.cmd_opts, "roop_loglevel", "INFO")
 loglevel = getattr(logging, loglevel_string.upper(), "info")
 logger.setLevel(loglevel)
