@@ -1,4 +1,4 @@
-# Roop-GE 0.2.1 for StableDiffusion
+# Roop-GE 0.2.2b for StableDiffusion
 ### NSFW (uncensored) version (use it on your own responsibility) of [original sd-webui-roop](https://github.com/s0md3v/sd-webui-roop) with a lot of improvements
 
 > GE (Gourieff Edition), aka "NSFW-Roop"
