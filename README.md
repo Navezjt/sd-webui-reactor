@@ -37,7 +37,7 @@ To install the extension, follow these steps:
 
 If you use [SD.Next](https://github.com/vladmandic/automatic):
 
-1. (For Windows Users) The same 1st step as you see above (VS Studio 2022 or VS C++ Build Tools)
+1. (For Windows Users) The same 1st step as you see above (VS 2022 or VS C++ Build Tools)
 2. Go to `automatic\venv\Scripts` or `automatic/venv/bin`, run Terminal or Console (cmd) for that folder and type `activate`
 3. Run `pip install insightface==0.7.3`
 4. Run SD.Next, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "Install from URL" tab
@@ -127,6 +127,34 @@ This error may occur if there's smth wrong with the model file `inswapper_128.on
 
 Try to download it manually from [here](https://huggingface.co/henryruhs/roop/resolve/main/inswapper_128.onnx)
 and put it to the `stable-diffusion-webui\models\roop` replacing existing one
+
+**VI. "ValueError: This ORT build has ['TensorrtExecutionProvider', 'CUDAExecutionProvider', 'CPUExecutionProvider'] enabled"**
+
+1. Go to the `G:\stable-diffusion-webui\venv\lib\site-packages` and see if there are any folders with names start from "~" (for example "~rotobuf"), delete them
+2. Go to the `G:\stable-diffusion-webui\venv\Scripts` run CMD there and type `activate` in your Console
+3. Then:
+- `python -m pip install -U pip`
+- `pip uninstall -y onnx onnxruntime onnxruntime-gpu onnxruntime-silicon`
+- `pip install onnx==1.14.0 onnxruntime==1.15.0`
+
+**VII. "ImportError: cannot import name 'builder' from 'google.protobuf.internal'"**
+
+1. Go to the `G:\stable-diffusion-webui\venv\lib\site-packages` and see if there are any folders with names start from "~" (for example "~rotobuf"), delete them
+2. Go to the `G:\stable-diffusion-webui\venv\Scripts` run CMD there and type `activate` in your Console
+3. Then:
+- `python -m pip install -U pip`
+- `pip uninstall protobuf`
+- `pip install protobuf==3.20.3`
+
+If this method doesn't help - there is some other extension that has a higher version of protobuf dependence and sd-webui installs it on startup requirements check
+
+**VIII. (For Windows users) If you still cannot build Insightface for some reasons or just don't want to install Visual Studio or VS C++ Build Tools - do the following:**
+
+1. Download and put [prebuilt Insightface package](https://github.com/Gourieff/sd-webui-roop-nsfw/raw/main/example/insightface-0.7.3-cp310-cp310-win_amd64.whl) into the stable-diffusion-webui (or SD.Next) root folder (where you have "webui-user.bat" file)
+2. From stable-diffusion-webui (or SD.Next) root folder run CMD and `.\venv\Scripts\activate`
+3. Then update your PIP: `python -m pip install -U pip`
+4. Then install Insightface: `pip install insightface-0.7.3-cp310-cp310-win_amd64.whl`
+5. Enjoy!
 
 ## Updating
 
