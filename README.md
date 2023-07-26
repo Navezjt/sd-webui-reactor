@@ -26,24 +26,26 @@ Users of this software are expected to use this software responsibly while abidi
 
 <a name="a1111">If you use [AUTOMATIC1111 web-ui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/):
 
-1. (For Windows Users) Install **Visual Studio 2022** (Community version, for example - you need this step to build some of dependencies):
+1. (For Windows Users):
+  - Install **Visual Studio 2022** (Community version, for example - you need this step to build some of dependencies):
   https://visualstudio.microsoft.com/downloads/
-  OR only **VS C++ Build Tools** (if you don't need the whole Visual Studio) and select "Desktop Development with C++" under "Workloads -> Desktop & Mobile":
+  - OR only **VS C++ Build Tools** (if you don't need the whole Visual Studio) and select "Desktop Development with C++" under "Workloads -> Desktop & Mobile":
   https://visualstudio.microsoft.com/visual-cpp-build-tools/
-2. In web-ui, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "Install from URL" tab and click "Install"
-3. Please, wait for several minutes until installation process will end
-4. Check the last message in your SD-WebUI Console:
+  - OR if you don't want to install VS or VS C++ BT - follow [this steps](#insightfacebuild)
+3. In web-ui, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "Install from URL" tab and click "Install"
+4. Please, wait for several minutes until the installation process will be finished
+5. Check the last message in your SD-WebUI Console:
 * If you see the message "--- PLEASE, RESTART the Server! ---" - so, do it, stop the Server (CTRL+C) and start it again. 
 * If you see the message "Done!", just go to the "Installed" tab (*if you have any other Roop extension enabled - disable it, otherwise this extension won't work*), click "Apply and restart UI"
 5. Enjoy!
 
 <a name="sdnext">If you use [SD.Next](https://github.com/vladmandic/automatic):
 
-1. (For Windows Users) The same 1st step as you see above (VS 2022 or VS C++ Build Tools)
+1. (For Windows Users) The same [1st step](#a1111) as for Automatic1111
 2. Go to `automatic\venv\Scripts` or `automatic/venv/bin`, run Terminal or Console (cmd) for that folder and type `activate`
 3. Run `pip install insightface==0.7.3`
 4. Run SD.Next, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "Install from URL" tab and click "Install"
-5. Please, wait for several minutes until installation process will end
+5. Please, wait for several minutes until the installation process will be finished
 6. Check the last message in your SD.Next Console:
 * If you see the message "--- PLEASE, RESTART the Server! ---" - so, do it, stop the Server (CTRL+C) and start it again.
 * If you see the message "Done!", just go to the "Installed" tab (*if you have any other Roop extension enabled - disable it, otherwise this extension won't work*), click "Restart the UI"
@@ -53,7 +55,7 @@ Users of this software are expected to use this software responsibly while abidi
 <a name="colab">If you use [Cagliostro Colab UI](https://github.com/Linaqruf/sd-notebook-collection):
 
 1. In active web-ui, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "Install from URL" tab and click "Install"
-2. Please, wait for several minutes until installation process will end
+2. Please, wait for several minutes until the installation process will be finished
 3. When you see the message "--- PLEASE, RESTART the Server! ---" in your Colab Notebook Start UI section ("Start Cagliostro Colab UI") - just go to the "Installed" tab and click "Apply and restart UI" (*if you have any other Roop extension enabled - disable it before restart, otherwise this extension won't work*)
 4. Enjoy!
 
@@ -157,7 +159,7 @@ and put it to the `stable-diffusion-webui\models\roop` replacing existing one
 
 If this method doesn't help - there is some other extension that has a higher version of protobuf dependence and sd-webui installs it on startup requirements check
 
-**VIII. (For Windows users) If you still cannot build Insightface for some reasons or just don't want to install Visual Studio or VS C++ Build Tools - do the following:**
+<a name="insightfacebuild">**VIII. (For Windows users) If you still cannot build Insightface for some reasons or just don't want to install Visual Studio or VS C++ Build Tools - do the following:**
 
 1. Download and put [prebuilt Insightface package](https://github.com/Gourieff/sd-webui-roop-nsfw/raw/main/example/insightface-0.7.3-cp310-cp310-win_amd64.whl) into the stable-diffusion-webui (or SD.Next) root folder (where you have "webui-user.bat" file)
 2. From stable-diffusion-webui (or SD.Next) root folder run CMD and `.\venv\Scripts\activate`
