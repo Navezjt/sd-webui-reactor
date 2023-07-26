@@ -22,9 +22,9 @@ Users of this software are expected to use this software responsibly while abidi
 
 ## Installation
 
-[Automatic1111](#A1111) | [Vladmandic SD.Next](#sdnext) | [Google Colab SD WebUI](#colab)
+[Automatic1111](#a1111) | [Vladmandic SD.Next](#sdnext) | [Google Colab SD WebUI](#colab)
 
-<a name="A1111">If you use [AUTOMATIC1111 web-ui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/):
+<a name="a1111">If you use [AUTOMATIC1111 web-ui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/):
 
 1. (For Windows Users) Install **Visual Studio 2022** (Community version, for example - you need this step to build some of dependencies):
   https://visualstudio.microsoft.com/downloads/
