@@ -31,7 +31,7 @@ Users of this software are expected to use this software responsibly while abidi
   https://visualstudio.microsoft.com/downloads/
   - OR only **VS C++ Build Tools** (if you don't need the whole Visual Studio) and select "Desktop Development with C++" under "Workloads -> Desktop & Mobile":
   https://visualstudio.microsoft.com/visual-cpp-build-tools/
-  - OR if you don't want to install VS or VS C++ BT - follow [this steps](#insightfacebuild)
+  - OR if you don't want to install VS or VS C++ BT - follow [this steps (sec. VIII)](#insightfacebuild)
 3. In web-ui, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "Install from URL" tab and click "Install"
 4. Please, wait for several minutes until the installation process will be finished
 5. Check the last message in your SD-WebUI Console:
