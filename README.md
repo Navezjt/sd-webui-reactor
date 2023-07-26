@@ -22,31 +22,40 @@ Users of this software are expected to use this software responsibly while abidi
 
 ## Installation
 
-To install the extension, follow these steps:
+[Automatic1111](#A1111) | [Vladmandic SD.Next](#sdnext) | [Google Colab SD WebUI](#colab)
+
+<a name="A1111">If you use [AUTOMATIC1111 web-ui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/):
 
 1. (For Windows Users) Install **Visual Studio 2022** (Community version, for example - you need this step to build some of dependencies):
   https://visualstudio.microsoft.com/downloads/
   OR only **VS C++ Build Tools** (if you don't need the whole Visual Studio) and select "Desktop Development with C++" under "Workloads -> Desktop & Mobile":
   https://visualstudio.microsoft.com/visual-cpp-build-tools/
-2. In web-ui, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "Install from URL" tab
-3. Pelase, wait for several minutes until installation process will end
+2. In web-ui, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "Install from URL" tab and click "Install"
+3. Please, wait for several minutes until installation process will end
 4. Check the last message in your SD-WebUI Console:
 * If you see the message "--- PLEASE, RESTART the Server! ---" - so, do it, stop the Server (CTRL+C) and start it again. 
 * If you see the message "Done!", just go to the "Installed" tab (*if you have any other Roop extension enabled - disable it, otherwise this extension won't work*), click "Apply and restart UI"
 5. Enjoy!
 
-If you use [SD.Next](https://github.com/vladmandic/automatic):
+<a name="sdnext">If you use [SD.Next](https://github.com/vladmandic/automatic):
 
 1. (For Windows Users) The same 1st step as you see above (VS 2022 or VS C++ Build Tools)
 2. Go to `automatic\venv\Scripts` or `automatic/venv/bin`, run Terminal or Console (cmd) for that folder and type `activate`
 3. Run `pip install insightface==0.7.3`
-4. Run SD.Next, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "Install from URL" tab
-5. Pelase, wait for several minutes until installation process will end
+4. Run SD.Next, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "Install from URL" tab and click "Install"
+5. Please, wait for several minutes until installation process will end
 6. Check the last message in your SD.Next Console:
 * If you see the message "--- PLEASE, RESTART the Server! ---" - so, do it, stop the Server (CTRL+C) and start it again.
 * If you see the message "Done!", just go to the "Installed" tab (*if you have any other Roop extension enabled - disable it, otherwise this extension won't work*), click "Restart the UI"
 7. Stop SD.Next, go to the `automatic\extensions\sd-webui-roop-nsfw` directory - if you see there `models\roop` folder with the file `inswapper_128.onnx`, just move the file to the `automatic\models\roop` folder
 8. Run your SD.Next WebUI and enjoy!
+
+<a name="colab">If you use [Cagliostro Colab UI](https://github.com/Linaqruf/sd-notebook-collection):
+
+1. In active web-ui, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "Install from URL" tab and click "Install"
+2. Please, wait for several minutes until installation process will end
+3. When you see the message "--- PLEASE, RESTART the Server! ---" in your Colab Notebook Start UI section ("Start Cagliostro Colab UI") - just go to the "Installed" tab and click "Apply and restart UI" (*if you have any other Roop extension enabled - disable it before restart, otherwise this extension won't work*)
+4. Enjoy!
 
 ## Usage
 
