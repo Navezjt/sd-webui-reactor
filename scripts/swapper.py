@@ -1,9 +1,7 @@
 import copy
-import math
 import os
-import tempfile
 from dataclasses import dataclass
-from typing import List, Union, Dict, Set, Tuple
+from typing import List, Union
 
 import cv2
 import numpy as np
@@ -12,9 +10,10 @@ from PIL import Image
 import insightface
 import onnxruntime
 
-from modules.face_restoration import FaceRestoration, restore_faces
-from modules.upscaler import Upscaler, UpscalerData
+from modules.face_restoration import FaceRestoration
+from modules.upscaler import UpscalerData
 from scripts.roop_logging import logger
+
 
 providers = onnxruntime.get_available_providers()
 
@@ -141,17 +140,6 @@ def get_face_single(img_data: np.ndarray, face_index=0, det_size=(640, 640)):
         return None
 
 
-@dataclass
-class ImageResult:
-    path: Union[str, None] = None
-    similarity: Union[Dict[int, float], None] = None  # face, 0..1
-
-    def image(self) -> Union[Image.Image, None]:
-        if self.path:
-            return Image.open(self.path)
-        return None
-
-
 def swap_face(
     source_img: Image.Image,
     target_img: Image.Image,
@@ -159,9 +147,8 @@ def swap_face(
     source_faces_index: List[int] = [0],
     faces_index: List[int] = [0],
     upscale_options: Union[UpscaleOptions, None] = None,
-) -> ImageResult:
+):
     result_image = target_img
-    fn = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
     if model is not None:
 
         if isinstance(source_img, str):  # source_img is a base64 string
@@ -209,5 +196,4 @@ def swap_face(
 
         else:
             logger.info("No source face(s) found")
-    result_image.save(fn.name)
-    return ImageResult(path=fn.name)
+    return result_image

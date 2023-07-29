@@ -12,10 +12,9 @@ import glob
 from modules.face_restoration import FaceRestoration
 
 from scripts.roop_logging import logger
-from scripts.swapper import UpscaleOptions, swap_face, ImageResult
+from scripts.swapper import UpscaleOptions, swap_face
 from scripts.roop_version import version_flag
 import os
-
 
 def get_models():
     models_path = os.path.join(scripts.basedir(), "models/roop/*")
@@ -191,7 +190,7 @@ class FaceSwapScript(scripts.Script):
                             model=self.model,
                             upscale_options=self.upscale_options,
                         )
-                        p.init_images[i] = result.image()
+                        p.init_images[i] = result
             else:
                 logger.error(f"Please provide a source face")
 
@@ -203,7 +202,7 @@ class FaceSwapScript(scripts.Script):
         if self.enable and self.swap_in_generated:
             if self.source is not None:
                 image: Image.Image = script_pp.image
-                result: ImageResult = swap_face(
+                result = swap_face(
                     self.source,
                     image,
                     source_faces_index=self.source_faces_index,
@@ -211,7 +210,10 @@ class FaceSwapScript(scripts.Script):
                     model=self.model,
                     upscale_options=self.upscale_options,
                 )
-                pp = scripts_postprocessing.PostprocessedImage(result.image())
-                pp.info = {}
-                p.extra_generation_params.update(pp.info)
-                script_pp.image = pp.image
+                try:
+                    pp = scripts_postprocessing.PostprocessedImage(result)
+                    pp.info = {}
+                    p.extra_generation_params.update(pp.info)
+                    script_pp.image = pp.image
+                except:
+                    logger.error(f"Cannot create a result image")
