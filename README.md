@@ -115,7 +115,6 @@ Please, check the path where "inswapper_128.onnx" model is stored. It must be in
    - `pip install onnx==1.14.0`
    - `pip install onnxruntime==1.15.0`
    - `pip install opencv-python==4.7.0.72`
-   - `pip install diffusers==0.17.1`
    - `pip install tqdm`
 7. Type `deactivate`, you can close your Terminal or Console and start your sd-webui, Roop should start OK - if not, welcome to Issues section.
 
