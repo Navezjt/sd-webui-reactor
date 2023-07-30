@@ -12,7 +12,7 @@ import onnxruntime
 
 from modules.face_restoration import FaceRestoration
 from modules.upscaler import UpscalerData
-from scripts.roop_logging import logger
+from scripts.logger import logger
 
 
 providers = onnxruntime.get_available_providers()

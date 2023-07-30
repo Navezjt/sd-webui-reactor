@@ -11,9 +11,10 @@ from PIL import Image
 import glob
 from modules.face_restoration import FaceRestoration
 
-from scripts.roop_logging import logger
+from scripts.logger import logger
 from scripts.swapper import UpscaleOptions, swap_face
-from scripts.roop_version import version_flag
+from scripts.version import version_flag
+from scripts.console_log_patch import apply_logging_patch
 import os
 
 def get_models():
@@ -34,7 +35,7 @@ class FaceSwapScript(scripts.Script):
         with gr.Accordion(f"Roop-GE {version_flag}", open=False):
             with gr.Column():
                 img = gr.inputs.Image(type="pil")
-                enable = gr.Checkbox(False, placeholder="enable", label="Enable")
+                enable = gr.Checkbox(False, label="Enable")
                 source_faces_index = gr.Textbox(
                     value="0",
                     placeholder="Which face(s) to use as source (comma separated)",
@@ -57,7 +58,6 @@ class FaceSwapScript(scripts.Script):
                     )
                 restore_first = gr.Checkbox(
                     True,
-                    placeholder="Restore face, then Upscale",
                     label="1. Restore face -> 2. Upscale (-Uncheck- if you want vice versa)",
                 )
                 upscaler_name = gr.inputs.Dropdown(
@@ -76,7 +76,7 @@ class FaceSwapScript(scripts.Script):
                     )
                     model = gr.inputs.Dropdown(
                         choices=models,
-                        label="Model not found, please download one and reload automatic 1111",
+                        label="Model not found, please download one and reload WebUI",
                     )
                 else:
                     model = gr.inputs.Dropdown(
@@ -85,15 +85,19 @@ class FaceSwapScript(scripts.Script):
 
                 swap_in_source = gr.Checkbox(
                     False,
-                    placeholder="Swap face in source image",
                     label="Swap in source image",
                     visible=is_img2img,
                 )
                 swap_in_generated = gr.Checkbox(
                     True,
-                    placeholder="Swap face in generated image",
                     label="Swap in generated image",
                     visible=is_img2img,
+                )
+                console_logging_level = gr.Radio(
+                    ["Minimum", "Medium", "Maximum"],
+                    value="Medium",
+                    label="Console Log Level",
+                    type="index",
                 )
 
         return [
@@ -110,6 +114,7 @@ class FaceSwapScript(scripts.Script):
             upscaler_visibility,
             swap_in_source,
             swap_in_generated,
+            console_logging_level
         ]
 
 
@@ -154,6 +159,7 @@ class FaceSwapScript(scripts.Script):
         upscaler_visibility,
         swap_in_source,
         swap_in_generated,
+        console_logging_level,
     ):
         self.source = img
         self.face_restorer_name = face_restorer_name
@@ -165,6 +171,7 @@ class FaceSwapScript(scripts.Script):
         self.upscaler_name = upscaler_name       
         self.swap_in_generated = swap_in_generated
         self.model = model
+        self.console_logging_level = console_logging_level
         self.source_faces_index = [
             int(x) for x in source_faces_index.strip(",").split(",") if x.isnumeric()
         ]
@@ -177,6 +184,7 @@ class FaceSwapScript(scripts.Script):
             self.faces_index = [0]
         if self.enable:
             if self.source is not None:
+                apply_logging_patch(console_logging_level)
                 if isinstance(p, StableDiffusionProcessingImg2Img) and swap_in_source:
                     logger.info(f"Roop-GE is enabled, face index %s", self.faces_index)
 

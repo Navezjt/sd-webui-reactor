@@ -35,6 +35,7 @@ args=[
     1, #10 Upscaler visibility (if scale = 1)
     False, #11 Swap in source image
     True, #12 Swap in generated image
+    1, #13 Console Log Level (0 - min, 1 - med or 2 - max)
 ]
 
 # The args for roop-ge can be found by 
