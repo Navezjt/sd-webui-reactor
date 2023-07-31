@@ -14,6 +14,7 @@ from modules.face_restoration import FaceRestoration
 from modules.upscaler import UpscalerData
 from scripts.logger import logger
 
+np.warnings.filterwarnings('ignore')
 
 providers = onnxruntime.get_available_providers()
 

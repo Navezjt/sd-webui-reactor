@@ -17,11 +17,21 @@ from scripts.version import version_flag
 from scripts.console_log_patch import apply_logging_patch
 import os
 
+MODELS_PATH = None
+
 def get_models():
+    global MODELS_PATH
     models_path = os.path.join(scripts.basedir(), "models/roop/*")
     models = glob.glob(models_path)
     models = [x for x in models if x.endswith(".onnx") or x.endswith(".pth")]
-    return models
+    models_names = []
+    for model in models:
+        model_path = os.path.split(model)
+        if MODELS_PATH is None:
+            MODELS_PATH = model_path[0]
+        model_name = model_path[1]
+        models_names.append(model_name)
+    return models_names
 
 
 class FaceSwapScript(scripts.Script):
@@ -35,17 +45,18 @@ class FaceSwapScript(scripts.Script):
         with gr.Accordion(f"Roop-GE {version_flag}", open=False):
             with gr.Column():
                 img = gr.inputs.Image(type="pil")
-                enable = gr.Checkbox(False, label="Enable")
-                source_faces_index = gr.Textbox(
-                    value="0",
-                    placeholder="Which face(s) to use as source (comma separated)",
-                    label="Comma separated face number(s) from swap-source image (above)",
-                )
-                faces_index = gr.Textbox(
-                    value="0",
-                    placeholder="Which face to swap (comma separated)",
-                    label="Comma separated face number(s) for target image (result)",
-                )
+                enable = gr.Checkbox(False, label="Enable", info="The Extension will be renamed to a cool new name in a future update! Stay tuned!")
+                with gr.Row():
+                    source_faces_index = gr.Textbox(
+                        value="0",
+                        placeholder="Which face(s) to use as source (comma separated)",
+                        label="Comma separated face number(s) from swap-source image (above); Example: 0,2,1",
+                    )
+                    faces_index = gr.Textbox(
+                        value="0",
+                        placeholder="Which face to swap (comma separated)",
+                        label="Comma separated face number(s) for target image (result); Example: 1,0,2",
+                    )
                 with gr.Row():
                     face_restorer_name = gr.Radio(
                         label="Restore Face",
@@ -54,33 +65,21 @@ class FaceSwapScript(scripts.Script):
                         type="value",
                     )
                     face_restorer_visibility = gr.Slider(
-                        0, 1, 1, step=0.1, label="Restore visibility"
+                        0, 1, 1, step=0.1, label="Restore Face Visibility"
                     )
                 restore_first = gr.Checkbox(
                     True,
-                    label="1. Restore face -> 2. Upscale (-Uncheck- if you want vice versa)",
+                    label="1. Restore Face -> 2. Upscale (-Uncheck- if you want vice versa)",
+                    info="Postprocessing Order"
                 )
                 upscaler_name = gr.inputs.Dropdown(
                     choices=[upscaler.name for upscaler in shared.sd_upscalers],
                     label="Upscaler",
                 )
-                upscaler_scale = gr.Slider(1, 8, 1, step=0.1, label="Upscaler scale")
-                upscaler_visibility = gr.Slider(
-                    0, 1, 1, step=0.1, label="Upscaler visibility (if scale = 1)"
-                )
-                
-                models = get_models()
-                if len(models) == 0:
-                    logger.warning(
-                        "You should at least have one model in models directory, please read the doc here : https://github.com/Gourieff/sd-webui-roop-nsfw/"
-                    )
-                    model = gr.inputs.Dropdown(
-                        choices=models,
-                        label="Model not found, please download one and reload WebUI",
-                    )
-                else:
-                    model = gr.inputs.Dropdown(
-                        choices=models, label="Model", default=models[0]
+                with gr.Row():
+                    upscaler_scale = gr.Slider(1, 8, 1, step=0.1, label="Scale by")
+                    upscaler_visibility = gr.Slider(
+                        0, 1, 1, step=0.1, label="Upscaler Visibility (if scale = 1)"
                     )
 
                 swap_in_source = gr.Checkbox(
@@ -93,12 +92,27 @@ class FaceSwapScript(scripts.Script):
                     label="Swap in generated image",
                     visible=is_img2img,
                 )
-                console_logging_level = gr.Radio(
-                    ["Minimum", "Medium", "Maximum"],
-                    value="Medium",
-                    label="Console Log Level",
-                    type="index",
-                )
+                
+                models = get_models()
+                with gr.Row():
+                    if len(models) == 0:
+                        logger.warning(
+                            "You should at least have one model in models directory, please read the doc here : https://github.com/Gourieff/sd-webui-roop-nsfw/"
+                        )
+                        model = gr.inputs.Dropdown(
+                            choices=models,
+                            label="Model not found, please download one and reload WebUI",
+                        )
+                    else:
+                        model = gr.inputs.Dropdown(
+                            choices=models, label="Model", default=models[0]
+                        )
+                    console_logging_level = gr.Radio(
+                        ["No log", "Minimum", "Default"],
+                        value="Minimum",
+                        label="Console Log Level",
+                        type="index",
+                    )
 
         return [
             img,
@@ -161,6 +175,7 @@ class FaceSwapScript(scripts.Script):
         swap_in_generated,
         console_logging_level,
     ):
+        global MODELS_PATH
         self.source = img
         self.face_restorer_name = face_restorer_name
         self.upscaler_scale = upscaler_scale
@@ -170,7 +185,7 @@ class FaceSwapScript(scripts.Script):
         self.restore_first = restore_first
         self.upscaler_name = upscaler_name       
         self.swap_in_generated = swap_in_generated
-        self.model = model
+        self.model = os.path.join(MODELS_PATH,model)
         self.console_logging_level = console_logging_level
         self.source_faces_index = [
             int(x) for x in source_faces_index.strip(",").split(",") if x.isnumeric()
