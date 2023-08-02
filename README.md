@@ -64,7 +64,7 @@ Users of this software are expected to use this software responsibly while abidi
 2. Turn on the "Enable" checkbox;
 3. That's it, now the generated result will have the face you selected.
 
-<img src="example/example.jpg" alt="example"/>
+<img src="example/example.jpg" alt="example" width="808"/>
 
 **You can use ReActor with Webui API:**
 1. Check the [SD Web API Wiki](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/API) for how to use API;
