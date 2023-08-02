@@ -13,7 +13,7 @@ from modules.face_restoration import FaceRestoration
 
 from scripts.logger import logger
 from scripts.swapper import UpscaleOptions, swap_face
-from scripts.version import version_flag
+from scripts.version import version_flag, app_title
 from scripts.console_log_patch import apply_logging_patch
 import os
 
@@ -36,16 +36,16 @@ def get_models():
 
 class FaceSwapScript(scripts.Script):
     def title(self):
-        return f"Roop-GE"
+        return f"{app_title}"
 
     def show(self, is_img2img):
         return scripts.AlwaysVisible
 
     def ui(self, is_img2img):
-        with gr.Accordion(f"Roop-GE {version_flag}", open=False):
+        with gr.Accordion(f"{app_title} (ex Roop-GE)", open=False):
             with gr.Column():
                 img = gr.inputs.Image(type="pil")
-                enable = gr.Checkbox(False, label="Enable", info="The Extension will be renamed to a cool new name in a future update! Stay tuned!")
+                enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple \"roop-based\" FaceSwap Extension - {version_flag}")
                 with gr.Row():
                     source_faces_index = gr.Textbox(
                         value="0",
@@ -201,10 +201,10 @@ class FaceSwapScript(scripts.Script):
             if self.source is not None:
                 apply_logging_patch(console_logging_level)
                 if isinstance(p, StableDiffusionProcessingImg2Img) and swap_in_source:
-                    logger.info(f"Roop-GE is enabled, face index %s", self.faces_index)
+                    logger.info(f"Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
 
                     for i in range(len(p.init_images)):
-                        logger.info(f"Swap in source %s", i)
+                        logger.info(f"Swap in %s", i)
                         result = swap_face(
                             self.source,
                             p.init_images[i],
@@ -224,6 +224,7 @@ class FaceSwapScript(scripts.Script):
     def postprocess_image(self, p, script_pp: scripts.PostprocessImageArgs, *args):
         if self.enable and self.swap_in_generated:
             if self.source is not None:
+                logger.info(f"Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
                 image: Image.Image = script_pp.image
                 result = swap_face(
                     self.source,

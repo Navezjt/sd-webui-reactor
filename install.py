@@ -35,7 +35,7 @@ def is_installed (
 def download(url, path):
     request = urllib.request.urlopen(url)
     total = int(request.headers.get('Content-Length', 0))
-    with tqdm(total=total, desc='Downloading', unit='B', unit_scale=True, unit_divisor=1024) as progress:
+    with tqdm(total=total, desc='Downloading...', unit='B', unit_scale=True, unit_divisor=1024) as progress:
         urllib.request.urlretrieve(url, path, reporthook=lambda count, block_size, total_size: progress.update(block_size))
 
 if not os.path.exists(models_dir):
@@ -44,7 +44,7 @@ if not os.path.exists(models_dir):
 if not os.path.exists(model_path):
     download(model_url, model_path)
 
-print("Checking Roop-GE requirements...")
+print("Checking ReActor (ex Roop-GE) requirements...", end=' ')
 with open(req_file) as file:
     install_count = 0
     for package in file:
@@ -58,9 +58,9 @@ with open(req_file) as file:
                 run_pip(package)
         except Exception as e:
             print(e)
-            print(f"Warning: Failed to install {package}, Roop-GE will not work.")
+            print(f"\nERROR: Failed to install {package} - ReActor won't start")
             raise e
     if install_count > 0:
         print(f'\n--- PLEASE, RESTART the Server! ---\n')
     else:
-        print('Done!')
+        print('Ok')

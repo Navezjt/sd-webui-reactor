@@ -1,10 +1,10 @@
-# Roop-GE* 0.2.4b for StableDiffusion
-### NSFW (uncensored) version (use it on your own responsibility) of [original sd-webui-roop](https://github.com/s0md3v/sd-webui-roop) with a lot of improvements
+# ReActor 0.3.0 for StableDiffusion
+### The Fast and Simple "[roop-based](https://github.com/s0md3v/sd-webui-roop)" FaceSwap Extension with a lot of improvements and without NSFW filter (uncensored, use it on your own responsibility) 
 
-> *Will be renamed soon! Stay tuned! (GE - Gourieff Edition, aka "NSFW-Roop")
+> Ex "Roop-GE" (GE - Gourieff Edition, aka "NSFW-Roop"), the extension was renamed with the version 0.3.0
 
 ---
-[**Disclaimer**](#disclaimer) | [**Installation**](#installation) | [**Usage**](#usage) | [**Troubleshooting**](#troubleshooting) | [**Updating**](#updating)
+[**Disclaimer**](#disclaimer) | [**Installation**](#installation) | [**Usage**](#usage) | [**Troubleshooting**](#troubleshooting) | [**Updating**](#updating) | [**ComfyUI**](#comfyui)
 
 ---
 
@@ -35,8 +35,8 @@ Users of this software are expected to use this software responsibly while abidi
 2. In web-ui, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "Install from URL" tab and click "Install"
 3. Please, wait for several minutes until the installation process will be finished
 4. Check the last message in your SD-WebUI Console:
-* If you see the message "--- PLEASE, RESTART the Server! ---" - so, do it, stop the Server (CTRL+C) and start it again. 
-* If you see the message "Done!", just go to the "Installed" tab (*if you have any other Roop extension enabled - disable it, otherwise this extension won't work*), click "Apply and restart UI"
+* If you see the message "--- PLEASE, RESTART the Server! ---" - so, do it, stop the Server (CTRL+C or CMD+C) and start it again - or just go to the "Installed" tab (*if you have any other Roop-based extension enabled - disable it, otherwise this extension won't work*), click "Apply and restart UI" 
+* If you see the message "Done!", just go to the "Installed" tab (*if you have any other Roop-based extension enabled - disable it, otherwise this extension won't work*), click "Apply and restart UI" - or you can just simply reload the UI
 5. Enjoy!
 
 <a name="sdnext">If you use [SD.Next](https://github.com/vladmandic/automatic):
@@ -47,28 +47,29 @@ Users of this software are expected to use this software responsibly while abidi
 4. Run SD.Next, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "Install from URL" tab and click "Install"
 5. Please, wait for several minutes until the installation process will be finished
 6. Check the last message in your SD.Next Console:
-* If you see the message "--- PLEASE, RESTART the Server! ---" - so, do it, stop the Server (CTRL+C) and start it again.
-* If you see the message "Done!", just go to the "Installed" tab (*if you have any other Roop extension enabled - disable it, otherwise this extension won't work*), click "Restart the UI"
+* If you see the message "--- PLEASE, RESTART the Server! ---" - so, do it, stop the Server (CTRL+C or CMD+C) and start it again - or just go to the "Installed" tab (*if you have any other Roop-based extension enabled - disable it, otherwise this extension won't work*), click "Restart the UI"
 7. Stop SD.Next, go to the `automatic\extensions\sd-webui-roop-nsfw` directory - if you see there `models\roop` folder with the file `inswapper_128.onnx`, just move the file to the `automatic\models\roop` folder
 8. Run your SD.Next WebUI and enjoy!
 
 <a name="colab">If you use [Cagliostro Colab UI](https://github.com/Linaqruf/sd-notebook-collection):
 
-1. In active web-ui, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "Install from URL" tab and click "Install"
+1. In active WebUI, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-roop-nsfw` in the "Install from URL" tab and click "Install"
 2. Please, wait for several minutes until the installation process will be finished
-3. When you see the message "--- PLEASE, RESTART the Server! ---" in your Colab Notebook Start UI section ("Start Cagliostro Colab UI") - just go to the "Installed" tab and click "Apply and restart UI" (*if you have any other Roop extension enabled - disable it before restart, otherwise this extension won't work*)
+3. When you see the message "--- PLEASE, RESTART the Server! ---" (in your Colab Notebook Start UI section "Start Cagliostro Colab UI") - just go to the "Installed" tab and click "Apply and restart UI" (*if you have any other Roop-based extension enabled - disable it before restart, otherwise this extension won't work*)
 4. Enjoy!
 
 ## Usage
 
-1. Under "Roop-GE" drop-down menu, import an image containing a face;
+1. Under "ReActor" drop-down menu, import an image containing a face;
 2. Turn on the "Enable" checkbox;
 3. That's it, now the generated result will have the face you selected.
 
-**You can use Roop-GE with Webui API:**
+<img src="example/example.jpg" alt="example"/>
+
+**You can use ReActor with Webui API:**
 1. Check the [SD Web API Wiki](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/API) for how to use API;
-2. Call `requests.get(url=f'{address}/sdapi/v1/script-info')` to find the args that Roop-GE needs;
-3. Define Roop-GE script args and add like this `"alwayson_scripts": {"roop-ge":{"args":args}}` in the payload;
+2. Call `requests.get(url=f'{address}/sdapi/v1/script-info')` to find the args that ReActor needs;
+3. Define ReActor script args and add like this `"alwayson_scripts": {"reactor":{"args":args}}` in the payload;
 4. Call the API, there's an [full usage example](./example/api_example.py) in example folder.
 
 ### The result face is blurry
@@ -116,12 +117,12 @@ Please, check the path where "inswapper_128.onnx" model is stored. It must be in
    - `pip install onnxruntime==1.15.0`
    - `pip install opencv-python==4.7.0.72`
    - `pip install tqdm`
-7. Type `deactivate`, you can close your Terminal or Console and start your sd-webui, Roop should start OK - if not, welcome to Issues section.
+7. Type `deactivate`, you can close your Terminal or Console and start your sd-webui, ReActor should start OK - if not, welcome to Issues section.
 
 **III. "TypeError: UpscaleOptions.init() got an unexpected keyword argument 'do_restore_first'"**
 
-First of all - you need to disable any other Roop extensions:
-- Go to 'Extensions -> Installed' tab and uncheck any Roop except this one
+First of all - you need to disable any other Roop-based extensions:
+- Go to 'Extensions -> Installed' tab and uncheck any Roop-based extensions except this one
   <img src="example/roop-off.png" alt="uncompatible-with-other-roop"/>
 - Click 'Apply and restart UI'
 
@@ -140,8 +141,8 @@ and put it to the `stable-diffusion-webui\models\roop` replacing existing one
 
 **VI. "ValueError: This ORT build has ['TensorrtExecutionProvider', 'CUDAExecutionProvider', 'CPUExecutionProvider'] enabled"**
 
-1. Go to the `G:\stable-diffusion-webui\venv\lib\site-packages` and see if there are any folders with names start from "~" (for example "~rotobuf"), delete them
-2. Go to the `G:\stable-diffusion-webui\venv\Scripts` run CMD there and type `activate` in your Console
+1. Go to the `stable-diffusion-webui\venv\lib\site-packages` and see if there are any folders with names start from "~" (for example "~rotobuf"), delete them
+2. Go to the `stable-diffusion-webui\venv\Scripts` run CMD there and type `activate` in your Console
 3. Then:
 - `python -m pip install -U pip`
 - `pip uninstall -y onnx onnxruntime onnxruntime-gpu onnxruntime-silicon`
@@ -149,14 +150,14 @@ and put it to the `stable-diffusion-webui\models\roop` replacing existing one
 
 **VII. "ImportError: cannot import name 'builder' from 'google.protobuf.internal'"**
 
-1. Go to the `G:\stable-diffusion-webui\venv\lib\site-packages` and see if there are any folders with names start from "~" (for example "~rotobuf"), delete them
-2. Go to the `G:\stable-diffusion-webui\venv\Scripts` run CMD there and type `activate` in your Console
+1. Go to the `stable-diffusion-webui\venv\lib\site-packages` and see if there are any folders with names start from "~" (for example "~rotobuf"), delete them
+2. Go to the `stable-diffusion-webui\venv\Scripts` run CMD there and type `activate` in your Console
 3. Then:
 - `python -m pip install -U pip`
 - `pip uninstall protobuf`
 - `pip install protobuf==3.20.3`
 
-If this method doesn't help - there is some other extension that has a higher version of protobuf dependence and sd-webui installs it on startup requirements check
+If this method doesn't help - there is some other extension that has a higher version of protobuf dependence and SD WebUI installs it on startup requirements check
 
 <a name="insightfacebuild">**VIII. (For Windows users) If you still cannot build Insightface for some reasons or just don't want to install Visual Studio or VS C++ Build Tools - do the following:**
 
@@ -169,3 +170,8 @@ If this method doesn't help - there is some other extension that has a higher ve
 ## Updating
 
 A good and quick way to check for Extensions updates: https://github.com/Gourieff/sd-webui-extensions-updater
+
+## ComfyUI
+
+You can use ReActor with ComfyUI
+For the installation instruction follow the [ReActor Node repo](https://github.com/Gourieff/comfyui-reactor-node)

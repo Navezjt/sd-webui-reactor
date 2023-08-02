@@ -20,17 +20,17 @@ img_bytes = io.BytesIO()
 im.save(img_bytes, format='PNG') 
 img_base64 = base64.b64encode(img_bytes.getvalue()).decode('utf-8')
 
-# Roop-GE arguments:
+# ReActor arguments:
 args=[
     img_base64, #0
-    True, #1 Enable Roop-GE
+    True, #1 Enable ReActor
     '0', #2 Comma separated face number(s) from swap-source image
     '0', #3 Comma separated face number(s) for target image (result)
     'C:\stable-diffusion-webui\models/roop\inswapper_128.onnx', #4 model path
     'CodeFormer', #4 Restore Face: None; CodeFormer; GFPGAN
     1, #5 Restore visibility value
     True, #7 Restore face -> Upscale
-    '4x_NMKD-Superscale-SP_178000_G', #8 Upscaler (type 'None' if doesn't need), see full list here: http://127.0.0.1:7860/sdapi/v1/script-info -> roop-ge -> sec.8
+    '4x_NMKD-Superscale-SP_178000_G', #8 Upscaler (type 'None' if doesn't need), see full list here: http://127.0.0.1:7860/sdapi/v1/script-info -> reactor -> sec.8
     2, #9 Upscaler scale value
     1, #10 Upscaler visibility (if scale = 1)
     False, #11 Swap in source image
@@ -38,7 +38,7 @@ args=[
     1, #13 Console Log Level (0 - min, 1 - med or 2 - max)
 ]
 
-# The args for roop-ge can be found by 
+# The args for ReActor can be found by 
 # requests.get(url=f'{address}/sdapi/v1/script-info')
 
 prompt = "(8k, best quality, masterpiece, highly detailed:1.1),realistic photo of fantastic happy woman,hairstyle of blonde and red short bob hair,modern clothing,cinematic lightning,film grain,dynamic pose,bokeh,dof"
@@ -55,7 +55,7 @@ payload = {
     "width": 512,
     "height": 768,
     "restore_faces": False,
-    "alwayson_scripts": {"roop-ge":{"args":args}}
+    "alwayson_scripts": {"reactor":{"args":args}}
 }
 
 try:

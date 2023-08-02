@@ -77,7 +77,7 @@ def upscale_image(image: Image, upscale_options: UpscaleOptions):
     if upscale_options.do_restore_first:
         if upscale_options.face_restorer is not None:
             original_image = result_image.copy()
-            logger.info("Restore face with %s", upscale_options.face_restorer.name())
+            logger.info("Restoring the face with %s", upscale_options.face_restorer.name())
             numpy_image = np.array(result_image)
             numpy_image = upscale_options.face_restorer.restore(numpy_image)
             restored_image = Image.fromarray(numpy_image)
@@ -87,7 +87,7 @@ def upscale_image(image: Image, upscale_options: UpscaleOptions):
         if upscale_options.upscaler is not None and upscale_options.upscaler.name != "None":
             original_image = result_image.copy()
             logger.info(
-                "Upscale with %s scale = %s",
+                "Upscaling with %s scale = %s",
                 upscale_options.upscaler.name,
                 upscale_options.scale,
             )
@@ -102,7 +102,7 @@ def upscale_image(image: Image, upscale_options: UpscaleOptions):
         if upscale_options.upscaler is not None and upscale_options.upscaler.name != "None":
             original_image = result_image.copy()
             logger.info(
-                "Upscale with %s scale = %s",
+                "Upscaling with %s scale = %s",
                 upscale_options.upscaler.name,
                 upscale_options.scale,
             )
@@ -115,7 +115,7 @@ def upscale_image(image: Image, upscale_options: UpscaleOptions):
                 )
         if upscale_options.face_restorer is not None:
             original_image = result_image.copy()
-            logger.info("Restore face with %s", upscale_options.face_restorer.name())
+            logger.info("Restoring the face with %s", upscale_options.face_restorer.name())
             numpy_image = np.array(result_image)
             numpy_image = upscale_options.face_restorer.restore(numpy_image)
             restored_image = Image.fromarray(numpy_image)
@@ -192,7 +192,7 @@ def swap_face(
                     logger.info(f"No source face found for face number {source_face_idx}.")
 
             result_image = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
-            if upscale_options is not None:
+            if upscale_options is not None and target_face is not None:
                 result_image = upscale_image(result_image, upscale_options)
 
         else:
