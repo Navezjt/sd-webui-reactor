@@ -149,6 +149,8 @@ and put it to the `stable-diffusion-webui\models\roop` replacing existing one
 - `pip uninstall -y onnx onnxruntime onnxruntime-gpu onnxruntime-silicon`
 - `pip install onnx==1.14.0 onnxruntime==1.15.0`
 
+If it didn't help - it seems that you have another extension reinstalling `onnxruntime` when SD WebUI checks requirements. Please see your extensions list. If you find there "WD14 tagger" - try to disable it and then follow the steps above once again. This extension causes reinstalling of `onnxruntime` to `onnxruntime-gpu` every time SD WebUI runs.
+
 **VII. "ImportError: cannot import name 'builder' from 'google.protobuf.internal'"**
 
 1. Go to the `stable-diffusion-webui\venv\lib\site-packages` and see if there are any folders with names start from "~" (for example "~rotobuf"), delete them
