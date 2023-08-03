@@ -97,7 +97,7 @@ class FaceSwapScript(scripts.Script):
                 with gr.Row():
                     if len(models) == 0:
                         logger.warning(
-                            "You should at least have one model in models directory, please read the doc here : https://github.com/Gourieff/sd-webui-roop-nsfw/"
+                            "You should at least have one model in models directory, please read the doc here : https://github.com/Gourieff/sd-webui-reactor/"
                         )
                         model = gr.inputs.Dropdown(
                             choices=models,
