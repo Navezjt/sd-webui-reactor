@@ -127,7 +127,9 @@ First of all - you need to disable any other Roop-based extensions:
   <img src="example/roop-off.png" alt="uncompatible-with-other-roop"/>
 - Click 'Apply and restart UI'
 
-Alternative solution is here: https://github.com/Gourieff/sd-webui-reactor/issues/3
+Alternative solutions: 
+- https://github.com/Gourieff/sd-webui-reactor/issues/3#issuecomment-1615919243
+- https://github.com/Gourieff/sd-webui-reactor/issues/39#issuecomment-1666559134 (can be actual, if you use Vladmandic SD.Next)
 
 **IV. "AttributeError: 'FaceSwapScript' object has no attribute 'enable'"**
 
