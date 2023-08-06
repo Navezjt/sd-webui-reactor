@@ -1,25 +1,17 @@
 # ReActor 0.3.0 for StableDiffusion
-### The Fast and Simple "[roop-based](https://github.com/s0md3v/sd-webui-roop)" FaceSwap Extension with a lot of improvements and without NSFW filter (uncensored, use it on your own responsibility) 
+### The Fast and Simple "[roop-based](https://github.com/s0md3v/sd-webui-roop)" FaceSwap Extension with a lot of improvements and without NSFW filter (uncensored, use it on your own [responsibility](#disclaimer)) 
 
-> Ex "Roop-GE" (GE - Gourieff Edition, aka "NSFW-Roop"), the extension was renamed with the version 0.3.0
+> Ex "Roop-GE" (GE - Gourieff Edition, aka "NSFW-Roop"), the extension was renamed with the version 0.3.0<br>
 > Repository old link: `https://github.com/Gourieff/sd-webui-roop-nsfw`
 
 ---
-[**Disclaimer**](#disclaimer) | [**Installation**](#installation) | [**Usage**](#usage) | [**Troubleshooting**](#troubleshooting) | [**Updating**](#updating) | [**ComfyUI**](#comfyui)
+[**Installation**](#installation) | [**Usage**](#usage) | [**Troubleshooting**](#troubleshooting) | [**Updating**](#updating) | [**ComfyUI**](#comfyui) | [**Disclaimer**](#disclaimer)
 
 ---
 
 This is an extension for StableDiffusion's [AUTOMATIC1111 web-ui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/) that allows face-replacement in images. It is based on [Roop-GE](https://github.com/Gourieff/Roop-GE).
 
 <img src="example/demo_crop.jpg" alt="example"/>
-
-### Disclaimer
-
-This software is meant to be a productive contribution to the rapidly growing AI-generated media industry. It will help artists with tasks such as animating a custom character or using the character as a model for clothing etc.
-
-The developers of this software are aware of its possible unethical applicaitons and are committed to take preventative measures against them. We will continue to develop this project in the positive direction while adhering to law and ethics.
-
-Users of this software are expected to use this software responsibly while abiding the local law. If face of a real person is being used, users are suggested to get consent from the concerned person and clearly mention that it is a deepfake when posting content online. **Developers and Contributors of this software are not responsible for actions of end-users.**
 
 ## Installation
 
@@ -60,6 +52,8 @@ Users of this software are expected to use this software responsibly while abidi
 4. Enjoy!
 
 ## Usage
+
+> Using this software you are agree with [disclaimer](#disclaimer)
 
 1. Under "ReActor" drop-down menu, import an image containing a face;
 2. Turn on the "Enable" checkbox;
@@ -180,3 +174,18 @@ A good and quick way to check for Extensions updates: https://github.com/Gourief
 
 You can use ReActor with ComfyUI
 For the installation instruction follow the [ReActor Node repo](https://github.com/Gourieff/comfyui-reactor-node)
+
+## Disclaimer
+
+This software is meant to be a productive contribution to the rapidly growing AI-generated media industry. It will help artists with tasks such as animating a custom character or using the character as a model for clothing etc.
+
+The developers of this software are aware of its possible unethical applicaitons and are committed to take preventative measures against them. We will continue to develop this project in the positive direction while adhering to law and ethics.
+
+Users of this software are expected to use this software responsibly while abiding the local law. If face of a real person is being used, users are suggested to get consent from the concerned person and clearly mention that it is a deepfake when posting content online. **Developers and Contributors of this software are not responsible for actions of end-users.**
+
+By using this extension you are agree not to create any content that:
+- violates any laws;
+- causes any harm to a person or persons;
+- propogates (spreads) any information (both public or personal) or images (both public or personal) which could be meant for harm;
+- spreads misinformation;
+- targets vulnerable groups of people.
