@@ -65,7 +65,7 @@ This is an extension for StableDiffusion's [AUTOMATIC1111 web-ui](https://github
 1. Check the [SD Web API Wiki](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/API) for how to use API;
 2. Call `requests.get(url=f'{address}/sdapi/v1/script-info')` to find the args that ReActor needs;
 3. Define ReActor script args and add like this `"alwayson_scripts": {"reactor":{"args":args}}` in the payload;
-4. Call the API, there's an [full usage example](./example/api_example.py) in example folder.
+4. Call the API, there's a [full usage example](./example/api_example.py) in the example folder.
 
 ### The result face is blurry
 Use the "Restore Face" option. You can also try the "Upscaler" option or for more finer control, use an upscaler from the "Extras" tab.
