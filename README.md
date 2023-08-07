@@ -171,6 +171,21 @@ If this method doesn't help - there is some other extension that has a higher ve
 5. Then install Insightface: `pip install insightface-0.7.3-cp310-cp310-win_amd64.whl`
 6. Enjoy!
 
+**IX. 07-August Update problem**
+
+If after `git pull` you see the message: `Merge made by the 'recursive' strategy` and then when you check `git status` you see `Your branch is ahead of 'origin/main' by`
+
+Please do the next:
+
+Inside the folder `extensions\sd-webui-reactor` run Terminal or Console (cmd) and then:
+- `git reset f48bdf1 --hard`
+- `git pull`
+
+OR
+
+Just delete the folder `sd-webui-reactor` inside the `extensions` directory and then run Terminal or Console (cmd) and type `git clone https://github.com/Gourieff/sd-webui-reactor`
+
+
 ## Updating
 
 A good and quick way to check for Extensions updates: https://github.com/Gourieff/sd-webui-extensions-updater
