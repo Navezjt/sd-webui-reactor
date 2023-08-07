@@ -34,15 +34,16 @@ This is an extension for StableDiffusion's [AUTOMATIC1111 web-ui](https://github
 
 <a name="sdnext">If you use [SD.Next](https://github.com/vladmandic/automatic):
 
-1. (For Windows Users) The same [1st step](#a1111) as for Automatic1111
-2. Go to `automatic\venv\Scripts` or `automatic/venv/bin`, run Terminal or Console (cmd) for that folder and type `activate`
-3. Run `pip install insightface==0.7.3`
-4. Run SD.Next, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-reactor` in the "Install from URL" tab and click "Install"
-5. Please, wait for several minutes until the installation process will be finished
-6. Check the last message in your SD.Next Console:
+1. Close (stop) your SD WebUI Server if it's running
+2. (For Windows Users) See the [1st step](#a1111) for Automatic1111 (if you followed [this steps (sec. VIII)](#insightfacebuild) instead - go to the Step 5)
+3. Go to (Windows)`automatic\venv\Scripts` or (MacOS/Linux)`automatic/venv/bin`, run Terminal or Console (cmd) for that folder and type `activate`
+4. Run `pip install insightface==0.7.3`
+5. Run SD.Next, go to the "Extensions" tab and use this URL `https://github.com/Gourieff/sd-webui-reactor` in the "Install from URL" tab and click "Install"
+6. Please, wait for several minutes until the installation process will be finished
+7. Check the last message in your SD.Next Console:
 * If you see the message "--- PLEASE, RESTART the Server! ---" - so, do it, stop the Server (CTRL+C or CMD+C) and start it again - or just go to the "Installed" tab (*if you have any other Roop-based extension enabled - disable it, otherwise this extension won't work*), click "Restart the UI"
-7. Stop SD.Next, go to the `automatic\extensions\sd-webui-reactor` directory - if you see there `models\roop` folder with the file `inswapper_128.onnx`, just move the file to the `automatic\models\roop` folder
-8. Run your SD.Next WebUI and enjoy!
+8. Stop SD.Next, go to the `automatic\extensions\sd-webui-reactor` directory - if you see there `models\roop` folder with the file `inswapper_128.onnx`, just move the file to the `automatic\models\roop` folder
+9. Run your SD.Next WebUI and enjoy!
 
 <a name="colab">If you use [Cagliostro Colab UI](https://github.com/Linaqruf/sd-notebook-collection):
 
@@ -98,21 +99,22 @@ Please, check the path where "inswapper_128.onnx" model is stored. It must be in
 **II. Any problems with installing Insightface or other dependencies**
 
 (for Windows Users) If you have VS C++ Build Tools or MS VS 2022 installed but still have a problem, then try the next step:
-1. Close your sd-webui and start it again
+1. Close (stop) your SD WebUI Server and start it again
    
 (for Any OS Users) If the problem still there, then do the following:
-1. Go to `stable-diffusion-webui\venv\Lib\site-packages` folder (or it can be `stable-diffusion-webui/venv/lib/python3.10/site-packages`)
-2. If you see any folders with names start from `~` (ex. "~rotobuf") - delete them
-3. Go to `stable-diffusion-webui\venv\Scripts` or `stable-diffusion-webui/venv/bin`
-4. Run Terminal or Console (cmd) for that folder and type `activate`
-5. Update your pip at first: `pip install -U pip`
-6. Then one-by-one:
+1. Close (stop) your SD WebUI Server if it's running
+2. Go to (Windows)`venv\Lib\site-packages` folder or (MacOS/Linux)`venv/lib/python3.10/site-packages`
+3. If you see any folders with names start from `~` (e.g. "~rotobuf") - delete them
+4. Go to (Windows)`venv\Scripts` or (MacOS/Linux)`venv/bin`
+5. Run Terminal or Console (cmd) for that folder and type `activate`
+6. Update your pip at first: `pip install -U pip`
+7. Then one-by-one:
    - `pip install insightface==0.7.3`
    - `pip install onnx==1.14.0`
    - `pip install onnxruntime==1.15.0`
    - `pip install opencv-python==4.7.0.72`
    - `pip install tqdm`
-7. Type `deactivate`, you can close your Terminal or Console and start your sd-webui, ReActor should start OK - if not, welcome to Issues section.
+8. Type `deactivate`, you can close your Terminal or Console and start your SD WebUI, ReActor should start OK - if not, welcome to the Issues section.
 
 **III. "TypeError: UpscaleOptions.init() got an unexpected keyword argument 'do_restore_first'"**
 
@@ -138,9 +140,10 @@ and put it to the `stable-diffusion-webui\models\roop` replacing existing one
 
 **VI. "ValueError: This ORT build has ['TensorrtExecutionProvider', 'CUDAExecutionProvider', 'CPUExecutionProvider'] enabled"**
 
-1. Go to the `stable-diffusion-webui\venv\lib\site-packages` and see if there are any folders with names start from "~" (for example "~rotobuf"), delete them
-2. Go to the `stable-diffusion-webui\venv\Scripts` run CMD there and type `activate` in your Console
-3. Then:
+1. Close (stop) your SD WebUI Server if it's running
+2. Go to the (Windows)`venv\Lib\site-packages` or (MacOS/Linux)`venv/lib/python3.10/site-packages` and see if there are any folders with names start from "~" (for example "~rotobuf"), delete them
+3. Go to the (Windows)`venv\Scripts` or (MacOS/Linux)`venv/bin` run Terminal or Console (cmd) there and type `activate`
+4. Then:
 - `python -m pip install -U pip`
 - `pip uninstall -y onnx onnxruntime onnxruntime-gpu onnxruntime-silicon`
 - `pip install onnx==1.14.0 onnxruntime==1.15.0`
@@ -149,22 +152,24 @@ If it didn't help - it seems that you have another extension reinstalling `onnxr
 
 **VII. "ImportError: cannot import name 'builder' from 'google.protobuf.internal'"**
 
-1. Go to the `stable-diffusion-webui\venv\lib\site-packages` and see if there are any folders with names start from "~" (for example "~rotobuf"), delete them
-2. Go to the `stable-diffusion-webui\venv\Scripts` run CMD there and type `activate` in your Console
-3. Then:
+1. Close (stop) your SD WebUI Server if it's running
+2. Go to the (Windows)`venv\Lib\site-packages` or (MacOS/Linux)`venv/lib/python3.10/site-packages` and see if there are any folders with names start from "~" (for example "~rotobuf"), delete them
+3. Go to the (Windows)`venv\Scripts` or (MacOS/Linux)`venv/bin` run Terminal or Console (cmd) there and type `activate`
+4. Then:
 - `python -m pip install -U pip`
 - `pip uninstall protobuf`
 - `pip install protobuf==3.20.3`
 
-If this method doesn't help - there is some other extension that has a higher version of protobuf dependence and SD WebUI installs it on startup requirements check
+If this method doesn't help - there is some other extension that has a higher version of protobuf dependence and SD WebUI installs it on a startup requirements check
 
 <a name="insightfacebuild">**VIII. (For Windows users) If you still cannot build Insightface for some reasons or just don't want to install Visual Studio or VS C++ Build Tools - do the following:**
 
-1. Download and put [prebuilt Insightface package](https://github.com/Gourieff/sd-webui-reactor/raw/main/example/insightface-0.7.3-cp310-cp310-win_amd64.whl) into the stable-diffusion-webui (or SD.Next) root folder (where you have "webui-user.bat" file)
-2. From stable-diffusion-webui (or SD.Next) root folder run CMD and `.\venv\Scripts\activate`
-3. Then update your PIP: `python -m pip install -U pip`
-4. Then install Insightface: `pip install insightface-0.7.3-cp310-cp310-win_amd64.whl`
-5. Enjoy!
+1. Close (stop) your SD WebUI Server if it's running
+2. Download and put [prebuilt Insightface package](https://github.com/Gourieff/sd-webui-reactor/raw/main/example/insightface-0.7.3-cp310-cp310-win_amd64.whl) into the stable-diffusion-webui (or SD.Next) root folder (where you have "webui-user.bat" file)
+3. From stable-diffusion-webui (or SD.Next) root folder run CMD and `.\venv\Scripts\activate`
+4. Then update your PIP: `python -m pip install -U pip`
+5. Then install Insightface: `pip install insightface-0.7.3-cp310-cp310-win_amd64.whl`
+6. Enjoy!
 
 ## Updating
 
