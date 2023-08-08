@@ -3,7 +3,7 @@ from PIL import Image, PngImagePlugin
 from datetime import datetime, date
 
 address = 'http://127.0.0.1:7860'
-input_file = "extensions\sd-webui-roop-nsfw\example\IamSFW.jpg" # Input file path
+input_file = "extensions\sd-webui-reactor\example\IamSFW.jpg" # Input file path
 time = datetime.now()
 today = date.today()
 current_date = today.strftime('%Y-%m-%d')
