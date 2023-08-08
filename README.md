@@ -98,6 +98,8 @@ Please, check the path where "inswapper_128.onnx" model is stored. It must be in
 
 **II. Any problems with installing Insightface or other dependencies**
 
+(for Mac M1/M2 users) If you get errors when trying to install Insightface - please read https://github.com/Gourieff/sd-webui-reactor/issues/42
+
 (for Windows Users) If you have VS C++ Build Tools or MS VS 2022 installed but still have a problem, then try the next step:
 1. Close (stop) your SD WebUI Server and start it again
    
@@ -154,8 +156,9 @@ If it didn't help - it seems that you have another extension reinstalling `onnxr
 
 1. Close (stop) your SD WebUI Server if it's running
 2. Go to the (Windows)`venv\Lib\site-packages` or (MacOS/Linux)`venv/lib/python3.10/site-packages` and see if there are any folders with names start from "~" (for example "~rotobuf"), delete them
-3. Go to the (Windows)`venv\Scripts` or (MacOS/Linux)`venv/bin` run Terminal or Console (cmd) there and type `activate`
-4. Then:
+3. Go to the "google" folder (inside the "site-packages") and delete any folders there with names start from "~"
+4. Go to the (Windows)`venv\Scripts` or (MacOS/Linux)`venv/bin` run Terminal or Console (cmd) there and type `activate`
+5. Then:
 - `python -m pip install -U pip`
 - `pip uninstall protobuf`
 - `pip install protobuf==3.20.3`
