@@ -36,6 +36,8 @@ args=[
     False, #11 Swap in source image
     True, #12 Swap in generated image
     1, #13 Console Log Level (0 - min, 1 - med or 2 - max)
+    0, #14 Gender Detection (Source) (0 - No, 1 - Female Only, 2 - Male Only)
+    0, #15 Gender Detection (Target) (0 - No, 1 - Female Only, 2 - Male Only)
 ]
 
 # The args for ReActor can be found by 

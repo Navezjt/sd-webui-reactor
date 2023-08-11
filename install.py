@@ -3,6 +3,7 @@ import os, sys
 import pkg_resources
 from tqdm import tqdm
 import urllib.request
+from packaging import version as pv
 
 req_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "requirements.txt")
 
@@ -16,20 +17,21 @@ def run_pip(*args):
     subprocess.run([sys.executable, "-m", "pip", "install", *args])
 
 def is_installed (
-        package: str, version: str | None = None
+        package: str, version: str | None = None, strict: bool = True
 ):
     has_package = None
     try:
         has_package = pkg_resources.get_distribution(package)
         if has_package is not None:
             installed_version = has_package.version
-            if installed_version != version:
+            if (installed_version != version and strict == True) or (pv.parse(installed_version) < pv.parse(version) and strict == False):
                 return False
             else:
                 return True
         else:
             return False
-    except:
+    except Exception as e:
+        print(f"Error: {e}")
         return False
     
 def download(url, path):
@@ -44,16 +46,20 @@ if not os.path.exists(models_dir):
 if not os.path.exists(model_path):
     download(model_url, model_path)
 
-print("Checking ReActor (ex Roop-GE) requirements...", end=' ')
+print("Checking ReActor requirements...", end=' ')
 with open(req_file) as file:
     install_count = 0
+    strict = True
     for package in file:
         package_version = None
         try:
             package = package.strip()
             if "==" in package:
                 package_version = package.split('==')[1]
-            if not is_installed(package,package_version):
+            elif ">=" in package:
+                package_version = package.split('>=')[1]
+                strict = False
+            if not is_installed(package,package_version,strict):
                 install_count += 1
                 run_pip(package)
         except Exception as e:
@@ -61,6 +67,7 @@ with open(req_file) as file:
             print(f"\nERROR: Failed to install {package} - ReActor won't start")
             raise e
     if install_count > 0:
+        print(f'install_count={install_count}')
         print(f'\n--- PLEASE, RESTART the Server! ---\n')
     else:
         print('Ok')

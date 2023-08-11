@@ -42,21 +42,39 @@ class FaceSwapScript(scripts.Script):
         return scripts.AlwaysVisible
 
     def ui(self, is_img2img):
-        with gr.Accordion(f"{app_title} (ex Roop-GE)", open=False):
+        with gr.Accordion(f"{app_title}", open=False):
             with gr.Column():
                 img = gr.inputs.Image(type="pil")
                 enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple \"roop-based\" FaceSwap Extension - {version_flag}")
+                gr.Markdown("---")
+                gr.Markdown("Source Image (above):")
                 with gr.Row():
                     source_faces_index = gr.Textbox(
                         value="0",
-                        placeholder="Which face(s) to use as source (comma separated)",
-                        label="Comma separated face number(s) from swap-source image (above); Example: 0,2,1",
+                        placeholder="Which face(s) to use as Source (comma separated)",
+                        label="Comma separated face number(s); Example: 0,2,1",
                     )
+                    gender_source = gr.Radio(
+                        ["No", "Female Only", "Male Only"],
+                        value="No",
+                        label="Gender Detection (Source)",
+                        type="index",
+                    )
+                gr.Markdown("---")
+                gr.Markdown("Target Image (result):")
+                with gr.Row():
                     faces_index = gr.Textbox(
                         value="0",
-                        placeholder="Which face to swap (comma separated)",
-                        label="Comma separated face number(s) for target image (result); Example: 1,0,2",
+                        placeholder="Which face(s) to Swap into Target (comma separated)",
+                        label="Comma separated face number(s); Example: 1,0,2",
                     )
+                    gender_target = gr.Radio(
+                        ["No", "Female Only", "Male Only"],
+                        value="No",
+                        label="Gender Detection (Target)",
+                        type="index",
+                    )
+                gr.Markdown("---")
                 with gr.Row():
                     face_restorer_name = gr.Radio(
                         label="Restore Face",
@@ -81,7 +99,7 @@ class FaceSwapScript(scripts.Script):
                     upscaler_visibility = gr.Slider(
                         0, 1, 1, step=0.1, label="Upscaler Visibility (if scale = 1)"
                     )
-
+                gr.Markdown("---")
                 swap_in_source = gr.Checkbox(
                     False,
                     label="Swap in source image",
@@ -113,6 +131,7 @@ class FaceSwapScript(scripts.Script):
                         label="Console Log Level",
                         type="index",
                     )
+                gr.Markdown("---")
 
         return [
             img,
@@ -128,7 +147,9 @@ class FaceSwapScript(scripts.Script):
             upscaler_visibility,
             swap_in_source,
             swap_in_generated,
-            console_logging_level
+            console_logging_level,
+            gender_source,
+            gender_target,
         ]
 
 
@@ -174,6 +195,8 @@ class FaceSwapScript(scripts.Script):
         swap_in_source,
         swap_in_generated,
         console_logging_level,
+        gender_source,
+        gender_target,
     ):
         global MODELS_PATH
         self.source = img
@@ -187,6 +210,8 @@ class FaceSwapScript(scripts.Script):
         self.swap_in_generated = swap_in_generated
         self.model = os.path.join(MODELS_PATH,model)
         self.console_logging_level = console_logging_level
+        self.gender_source = gender_source
+        self.gender_target = gender_target
         self.source_faces_index = [
             int(x) for x in source_faces_index.strip(",").split(",") if x.isnumeric()
         ]
@@ -212,6 +237,8 @@ class FaceSwapScript(scripts.Script):
                             faces_index=self.faces_index,
                             model=self.model,
                             upscale_options=self.upscale_options,
+                            gender_source=self.gender_source,
+                            gender_target=self.gender_target,
                         )
                         p.init_images[i] = result
             else:
@@ -233,6 +260,8 @@ class FaceSwapScript(scripts.Script):
                     faces_index=self.faces_index,
                     model=self.model,
                     upscale_options=self.upscale_options,
+                    gender_source=self.gender_source,
+                    gender_target=self.gender_target,
                 )
                 try:
                     pp = scripts_postprocessing.PostprocessedImage(result)
