@@ -67,7 +67,6 @@ with open(req_file) as file:
             print(f"\nERROR: Failed to install {package} - ReActor won't start")
             raise e
     if install_count > 0:
-        print(f'install_count={install_count}')
         print(f'\n--- PLEASE, RESTART the Server! ---\n')
     else:
         print('Ok')
