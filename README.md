@@ -9,7 +9,7 @@
 
 ---
 
-This is an extension for StableDiffusion's [AUTOMATIC1111 web-ui](https://github.com/AUTOMATIC1111/stable-diffusion-webui/) that allows face-replacement in images. It is based on [Roop-GE](https://github.com/Gourieff/Roop-GE).
+This is an extension for Stable Diffusion WebUI that allows a very easy and accurate face-replacement (face swap) in images. Based on [Roop-GE](https://github.com/Gourieff/Roop-GE).
 
 <img src="example/demo_crop.jpg" alt="example"/>
 
