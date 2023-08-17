@@ -9,7 +9,7 @@
 
 ---
 
-This is an extension for Stable Diffusion WebUI that allows a very easy and accurate face-replacement (face swap) in images. Based on [Roop-GE](https://github.com/Gourieff/Roop-GE).
+ReActor is an extension for Stable Diffusion WebUI that allows a very easy and accurate face-replacement (face swap) in images. Based on [Roop-GE](https://github.com/Gourieff/Roop-GE).
 
 <img src="example/demo_crop.jpg" alt="example"/>
 
