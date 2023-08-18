@@ -198,31 +198,33 @@ class FaceSwapScript(scripts.Script):
         gender_source,
         gender_target,
     ):
-        global MODELS_PATH
-        self.source = img
-        self.face_restorer_name = face_restorer_name
-        self.upscaler_scale = upscaler_scale
-        self.upscaler_visibility = upscaler_visibility
-        self.face_restorer_visibility = face_restorer_visibility
         self.enable = enable
-        self.restore_first = restore_first
-        self.upscaler_name = upscaler_name       
-        self.swap_in_generated = swap_in_generated
-        self.model = os.path.join(MODELS_PATH,model)
-        self.console_logging_level = console_logging_level
-        self.gender_source = gender_source
-        self.gender_target = gender_target
-        self.source_faces_index = [
-            int(x) for x in source_faces_index.strip(",").split(",") if x.isnumeric()
-        ]
-        self.faces_index = [
-            int(x) for x in faces_index.strip(",").split(",") if x.isnumeric()
-        ]
-        if len(self.source_faces_index) == 0:
-            self.source_faces_index = [0]
-        if len(self.faces_index) == 0:
-            self.faces_index = [0]
         if self.enable:
+            
+            global MODELS_PATH
+            self.source = img
+            self.face_restorer_name = face_restorer_name
+            self.upscaler_scale = upscaler_scale
+            self.upscaler_visibility = upscaler_visibility
+            self.face_restorer_visibility = face_restorer_visibility
+            self.restore_first = restore_first
+            self.upscaler_name = upscaler_name       
+            self.swap_in_generated = swap_in_generated
+            self.model = os.path.join(MODELS_PATH,model)
+            self.console_logging_level = console_logging_level
+            self.gender_source = gender_source
+            self.gender_target = gender_target
+            self.source_faces_index = [
+                int(x) for x in source_faces_index.strip(",").split(",") if x.isnumeric()
+            ]
+            self.faces_index = [
+                int(x) for x in faces_index.strip(",").split(",") if x.isnumeric()
+            ]
+            if len(self.source_faces_index) == 0:
+                self.source_faces_index = [0]
+            if len(self.faces_index) == 0:
+                self.faces_index = [0]
+
             if self.source is not None:
                 apply_logging_patch(console_logging_level)
                 if isinstance(p, StableDiffusionProcessingImg2Img) and swap_in_source:
