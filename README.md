@@ -5,11 +5,26 @@
 > Repository old link: `https://github.com/Gourieff/sd-webui-roop-nsfw`
 
 ---
-[**Installation**](#installation) | [**Usage**](#usage) | [**Troubleshooting**](#troubleshooting) | [**Updating**](#updating) | [**ComfyUI**](#comfyui) | [**Disclaimer**](#disclaimer)
+[**Installation**](#installation) | [**Usage**](#usage) | [**Troubleshooting**](#troubleshooting) | [**Updating**](#updating) | [**ComfyUI**](#comfyui) | [**Disclaimer**](#disclaimer) 
 
 ---
 
-ReActor is an extension for Stable Diffusion WebUI that allows a very easy and accurate face-replacement (face swap) in images. Based on [Roop-GE](https://github.com/Gourieff/Roop-GE).
+<table>
+  <tr>
+    <td width="144px">
+      <a href="https://boosty.to/artgourieff" target="_blank">
+        <img src="https://lovemet.ru/www/boosty.jpg" width="108" alt="Support Me on Boosty"/>
+        <br>
+        <sup>
+          Support This Project
+        </sup>
+      </a>
+    </td>
+    <td>
+      ReActor is an extension for Stable Diffusion WebUI that allows a very easy and accurate face-replacement (face swap) in images. Based on <a href="https://github.com/Gourieff/Roop-GE" target="_blank">Roop-GE</a>.
+    </td>
+  </tr>
+</table>
 
 <img src="example/demo_crop.jpg" alt="example"/>
 
