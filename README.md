@@ -21,7 +21,7 @@
       </a>
     </td>
     <td>
-      ReActor is an extension for Stable Diffusion WebUI that allows a very easy and accurate face-replacement (face swap) in images. Based on <a href="https://github.com/Gourieff/Roop-GE" target="_blank">Roop-GE</a>.
+      ReActor is an extension for Stable Diffusion WebUI that allows a very easy and accurate face-replacement (face swap) in images. Based on <a href="https://github.com/Gourieff/ReActor-UI" target="_blank">ReActor-UI</a>.
     </td>
   </tr>
 </table>
