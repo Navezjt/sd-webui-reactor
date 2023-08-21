@@ -12,6 +12,7 @@ import onnxruntime
 
 from modules.face_restoration import FaceRestoration
 from modules.upscaler import UpscalerData
+from modules.shared import state
 from scripts.logger import logger
 
 import warnings
@@ -50,6 +51,31 @@ def cosine_similarity(test_vec: np.ndarray, source_vecs: List[np.ndarray]) -> fl
     return average_cos_dist
 
 
+MESSAGED_STOPPED = False
+MESSAGED_SKIPPED = False
+
+def reset_messaged():
+    global MESSAGED_STOPPED, MESSAGED_SKIPPED
+    if not state.interrupted:
+        MESSAGED_STOPPED = False
+    if not state.skipped:
+        MESSAGED_SKIPPED = False
+
+def check_process_halt(msgforced: bool = False):
+    global MESSAGED_STOPPED, MESSAGED_SKIPPED
+    if state.interrupted:
+        if not MESSAGED_STOPPED or msgforced:
+            logger.info("Stopped by User")
+            MESSAGED_STOPPED = True
+        return True
+    if state.skipped:
+        if not MESSAGED_SKIPPED or msgforced:
+            logger.info("Skipped by User")
+            MESSAGED_SKIPPED = True
+        return True
+    return False
+
+
 FS_MODEL = None
 CURRENT_FS_MODEL_PATH = None
 
@@ -77,6 +103,10 @@ def getFaceSwapModel(model_path: str):
 
 def upscale_image(image: Image, upscale_options: UpscaleOptions):
     result_image = image
+    
+    if check_process_halt(msgforced=True):
+        return result_image
+    
     if upscale_options.do_restore_first:
         if upscale_options.face_restorer is not None:
             original_image = result_image.copy()
@@ -193,6 +223,10 @@ def swap_face(
     gender_target: int = 0,
 ):
     result_image = target_img
+    
+    if check_process_halt():
+        return result_image
+    
     if model is not None:
 
         if isinstance(source_img, str):  # source_img is a base64 string
@@ -214,8 +248,9 @@ def swap_face(
         source_face, wrong_gender = get_face_single(source_img, face_index=source_faces_index[0], gender_source=gender_source)
 
         if len(source_faces_index) != 0 and len(source_faces_index) != 1 and len(source_faces_index) != len(faces_index):
-            logger.info(f'Source Faces must have no entries (default=0), one entry, or same number of entries as target faces.') 
+            logger.info("Source Faces must have no entries (default=0), one entry, or same number of entries as target faces.")
         elif source_face is not None:
+            
             result = target_img
             model_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), model)
             face_swapper = getFaceSwapModel(model_path)

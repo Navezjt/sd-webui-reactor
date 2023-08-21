@@ -1,4 +1,4 @@
-# ReActor 0.3.1 for StableDiffusion
+# ReActor 0.3.2b for StableDiffusion
 ### The Fast and Simple "[roop-based](https://github.com/s0md3v/sd-webui-roop)" FaceSwap Extension with a lot of improvements and without NSFW filter (uncensored, use it on your own [responsibility](#disclaimer)) 
 
 > Ex "Roop-GE" (GE - Gourieff Edition, aka "NSFW-Roop"), the extension was renamed with the version 0.3.0<br>

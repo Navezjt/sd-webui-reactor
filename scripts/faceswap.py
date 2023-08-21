@@ -6,13 +6,12 @@ from modules.processing import (
     StableDiffusionProcessing,
     StableDiffusionProcessingImg2Img,
 )
-from modules.shared import cmd_opts, opts, state
 from PIL import Image
 import glob
 from modules.face_restoration import FaceRestoration
 
 from scripts.logger import logger
-from scripts.swapper import UpscaleOptions, swap_face
+from scripts.swapper import UpscaleOptions, swap_face, check_process_halt, reset_messaged
 from scripts.version import version_flag, app_title
 from scripts.console_log_patch import apply_logging_patch
 import os
@@ -200,6 +199,10 @@ class FaceSwapScript(scripts.Script):
     ):
         self.enable = enable
         if self.enable:
+
+            reset_messaged()
+            if check_process_halt():
+                return
             
             global MODELS_PATH
             self.source = img
@@ -228,10 +231,10 @@ class FaceSwapScript(scripts.Script):
             if self.source is not None:
                 apply_logging_patch(console_logging_level)
                 if isinstance(p, StableDiffusionProcessingImg2Img) and swap_in_source:
-                    logger.info(f"Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
+                    logger.info("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
 
                     for i in range(len(p.init_images)):
-                        logger.info(f"Swap in %s", i)
+                        logger.info("Swap in %s", i)
                         result = swap_face(
                             self.source,
                             p.init_images[i],
@@ -243,8 +246,12 @@ class FaceSwapScript(scripts.Script):
                             gender_target=self.gender_target,
                         )
                         p.init_images[i] = result
+
+                        if shared.state.interrupted or shared.state.skipped:
+                            return
+            
             else:
-                logger.error(f"Please provide a source face")
+                logger.error("Please provide a source face")
 
     def postprocess_batch(self, p, *args, **kwargs):
         if self.enable:
@@ -252,8 +259,16 @@ class FaceSwapScript(scripts.Script):
 
     def postprocess_image(self, p, script_pp: scripts.PostprocessImageArgs, *args):
         if self.enable and self.swap_in_generated:
+
+            current_job_number = shared.state.job_no + 1
+            job_count = shared.state.job_count
+            if current_job_number == job_count:
+                reset_messaged()
+            if check_process_halt():
+                return
+           
             if self.source is not None:
-                logger.info(f"Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
+                logger.info("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
                 image: Image.Image = script_pp.image
                 result = swap_face(
                     self.source,
@@ -271,4 +286,4 @@ class FaceSwapScript(scripts.Script):
                     p.extra_generation_params.update(pp.info)
                     script_pp.image = pp.image
                 except:
-                    logger.error(f"Cannot create a result image")
+                    logger.error("Cannot create a result image")
