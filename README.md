@@ -1,11 +1,25 @@
-# ReActor 0.4.0a for StableDiffusion
+<div align="center">
+  
+  [![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/t/Gourieff/sd-webui-reactor/main)](https://github.com/Gourieff/sd-webui-reactor/commits/main)
+  ![Last commit](https://img.shields.io/github/last-commit/Gourieff/sd-webui-reactor/main)
+  [![Opened issues](https://img.shields.io/github/issues/Gourieff/sd-webui-reactor?color=red)](https://github.com/Gourieff/sd-webui-reactor/issues)
+  [![Closed issues](https://img.shields.io/github/issues-closed/Gourieff/sd-webui-reactor?color=green)](https://github.com/Gourieff/sd-webui-reactor/issues?q=is%3Aissue+is%3Aclosed)
+  ![GitHub](https://img.shields.io/github/license/Gourieff/sd-webui-reactor)
+
+</div>
+
+# <div align="center">ReActor 0.4.0a for StableDiffusion</div>
 ### The Fast and Simple "[roop-based](https://github.com/s0md3v/sd-webui-roop)" FaceSwap Extension with a lot of improvements and without NSFW filter (uncensored, use it on your own [responsibility](#disclaimer)) 
 
 > Ex "Roop-GE" (GE - Gourieff Edition, aka "NSFW-Roop"), the extension was renamed with the version 0.3.0<br>
 > Repository old link: `https://github.com/Gourieff/sd-webui-roop-nsfw`
 
 ---
-[**Installation**](#installation) | [**Usage**](#usage) | [**Troubleshooting**](#troubleshooting) | [**Updating**](#updating) | [**ComfyUI**](#comfyui) | [**Disclaimer**](#disclaimer) 
+<div align="center">
+  <b>
+    <a href="#installation">Installation</a> | <a href="#usage">Usage</a> | <a href="#troubleshooting">Troubleshooting</a> | <a href="#updating">Updating</a> | <a href="#comfyui">ComfyUI</a> | <a href="#disclaimer">Disclaimer</a>
+  </b>
+</div>
 
 ---
 
