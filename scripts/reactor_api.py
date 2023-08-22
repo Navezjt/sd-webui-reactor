@@ -1,6 +1,8 @@
 '''
-Thanks SpenserCai for the 1st version of this script
+Thanks SpenserCai for the original version of the roop api script
+-----------------------------------
 --- ReActor External API v1.0.0 ---
+-----------------------------------
 '''
 import os, glob
 from datetime import datetime, date
