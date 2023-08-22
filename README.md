@@ -152,7 +152,7 @@ You need to disable the "SD-CN-Animation" extension (or perhaps some another tha
 
 This error may occur if there's smth wrong with the model file `inswapper_128.onnx`
 
-Try to download it manually from [here](https://huggingface.co/henryruhs/roop/resolve/main/inswapper_128.onnx)
+Try to download it manually from [here](https://github.com/facefusion/facefusion-assets/releases/download/models/inswapper_128.onnx)
 and put it to the `stable-diffusion-webui\models\roop` replacing existing one
 
 **VI. "ValueError: This ORT build has ['TensorrtExecutionProvider', 'CUDAExecutionProvider', 'CPUExecutionProvider'] enabled"**
