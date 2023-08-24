@@ -225,7 +225,7 @@ A good and quick way to check for Extensions updates: https://github.com/Gourief
 
 ## ComfyUI
 
-You can use ReActor with ComfyUI
+You can use ReActor with ComfyUI.<br>
 For the installation instruction follow the [ReActor Node repo](https://github.com/Gourieff/comfyui-reactor-node)
 
 ## Disclaimer
