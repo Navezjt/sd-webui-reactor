@@ -8,7 +8,7 @@
 
 </div>
 
-# <div align="center">ReActor 0.4.0a for StableDiffusion</div>
+# <div align="center">ReActor 0.4.0b for StableDiffusion</div>
 ### The Fast and Simple "[roop-based](https://github.com/s0md3v/sd-webui-roop)" FaceSwap Extension with a lot of improvements and without NSFW filter (uncensored, use it on your own [responsibility](#disclaimer)) 
 
 > Ex "Roop-GE" (GE - Gourieff Edition, aka "NSFW-Roop"), the extension was renamed with the version 0.3.0<br>
@@ -17,7 +17,7 @@
 ---
 <div align="center">
   <b>
-    <a href="#installation">Installation</a> | <a href="#usage">Usage</a> | <a href="#troubleshooting">Troubleshooting</a> | <a href="#updating">Updating</a> | <a href="#comfyui">ComfyUI</a> | <a href="#disclaimer">Disclaimer</a>
+    <a href="#installation">Installation</a> | <a href="#usage">Usage</a> | <a href="#api">API</a> | <a href="#troubleshooting">Troubleshooting</a> | <a href="#updating">Updating</a> | <a href="#comfyui">ComfyUI</a> | <a href="#disclaimer">Disclaimer</a>
   </b>
 </div>
 
@@ -91,11 +91,6 @@
 
 <img src="example/example.jpg" alt="example" width="808"/>
 
-**You can use ReActor with Webui API:**
-1. Check the [SD Web API Wiki](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/API) for how to use API;
-2. Call `requests.get(url=f'{address}/sdapi/v1/script-info')` to find the args that ReActor needs;
-3. Define ReActor script args and add like this `"alwayson_scripts": {"reactor":{"args":args}}` in the payload;
-4. Call the API, there's a [full usage example](./example/api_example.py) in the example folder.
 
 ### The result face is blurry
 Use the "Restore Face" option. You can also try the "Upscaler" option or for more finer control, use an upscaler from the "Extras" tab.
@@ -118,6 +113,12 @@ Select the face numbers you wish to swap using the "Comma separated face number(
 You can choose to activate the swap on the source image or on the generated image, or on both using the checkboxes. Activating on source image allows you to start from a given base and apply the diffusion process to it.
 
 Inpainting should work but only the masked part will be swapped.
+
+## API
+
+You can use ReActor with the built-in Webui API or via an external API.
+
+Please follow **[this](/API.md)** page for the detailed instruction.
 
 ## Troubleshooting
 
