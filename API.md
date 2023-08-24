@@ -56,7 +56,7 @@ curl -X POST \
 
 * Set `"upscaler"` to `"None"` and `"scale"` to `1` if you don't need to upscale;
 * Set `"save_to_file"` to `1` if you need to save result to a file;
-* `"result_file_path"` is set to the `"outputs/api"` folder by default (please, create the folder beforehand to avoid any errors) with a timestamped filename ;(output_YYYY-MM-DD_hh-mm-ss), you can set any specific path, e.g. `"C:/stable-diffusion-webui/outputs/api/output.png"`.
+* `"result_file_path"` is set to the `"outputs/api"` folder by default (please, create the folder beforehand to avoid any errors) with a timestamped filename; (output_YYYY-MM-DD_hh-mm-ss), you can set any specific path, e.g. `"C:/stable-diffusion-webui/outputs/api/output.png"`.
 
 You can find full usage examples with all the available parameters in the "example" folder: [cURL](./example/api_external.curl), [JSON](./example/api_external.json).
 
