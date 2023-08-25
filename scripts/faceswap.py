@@ -217,6 +217,10 @@ class FaceSwapScript(scripts.Script):
             self.console_logging_level = console_logging_level
             self.gender_source = gender_source
             self.gender_target = gender_target
+            if self.gender_source is None or self.gender_source == "No":
+                self.gender_source = 0
+            if self.gender_target is None or self.gender_target == "No":
+                self.gender_target = 0
             self.source_faces_index = [
                 int(x) for x in source_faces_index.strip(",").split(",") if x.isnumeric()
             ]

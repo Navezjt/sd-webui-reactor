@@ -1,10 +1,14 @@
 <div align="center">
-  
+
+  <img src="example/ReActor_logo_red.png" alt="logo" width="180px"/>
+    
   [![GitHub commit activity (branch)](https://img.shields.io/github/commit-activity/t/Gourieff/sd-webui-reactor/main)](https://github.com/Gourieff/sd-webui-reactor/commits/main)
   ![Last commit](https://img.shields.io/github/last-commit/Gourieff/sd-webui-reactor/main)
   [![Opened issues](https://img.shields.io/github/issues/Gourieff/sd-webui-reactor?color=red)](https://github.com/Gourieff/sd-webui-reactor/issues)
   [![Closed issues](https://img.shields.io/github/issues-closed/Gourieff/sd-webui-reactor?color=green)](https://github.com/Gourieff/sd-webui-reactor/issues?q=is%3Aissue+is%3Aclosed)
   ![GitHub](https://img.shields.io/github/license/Gourieff/sd-webui-reactor)
+
+  English | [Русский](/README_RU.md)
 
 </div>
 
