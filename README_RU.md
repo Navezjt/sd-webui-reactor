@@ -1,8 +1,8 @@
 <div align="center">
 
-  <img src="example/ReActor_logo_red.png" alt="logo" width="180px" style="margin-bottom:-33px"/>
+  <img src="example/ReActor_logo_red.png" alt="logo" width="180px"/>
     
-  # ![Version](https://img.shields.io/badge/версия-0.4.0-brightgreen?style=for-the-badge&labelColor=darkgreen)
+  ![Version](https://img.shields.io/badge/версия-0.4.0-brightgreen?style=for-the-badge&labelColor=darkgreen)<hr>
   [![Commit activity](https://img.shields.io/github/commit-activity/t/Gourieff/sd-webui-reactor/main?cacheSeconds=0)](https://github.com/Gourieff/sd-webui-reactor/commits/main)
   ![Last commit](https://img.shields.io/github/last-commit/Gourieff/sd-webui-reactor/main?cacheSeconds=0)
   [![Opened issues](https://img.shields.io/github/issues/Gourieff/sd-webui-reactor?color=red)](https://github.com/Gourieff/sd-webui-reactor/issues?cacheSeconds=0)
