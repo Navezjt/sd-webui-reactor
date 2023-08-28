@@ -13,6 +13,7 @@ import onnxruntime
 from modules.face_restoration import FaceRestoration
 from modules.upscaler import UpscalerData
 from modules.shared import state
+from modules.paths_internal import models_path
 from scripts.logger import logger
 
 import warnings
@@ -86,7 +87,7 @@ def getAnalysisModel():
     global ANALYSIS_MODEL
     if ANALYSIS_MODEL is None:
         ANALYSIS_MODEL = insightface.app.FaceAnalysis(
-            name="buffalo_l", providers=providers # note: allowed_modules=['detection', 'genderage']
+            name="buffalo_l", providers=providers, root=os.path.join(models_path, "insightface") # note: allowed_modules=['detection', 'genderage']
         )
     return ANALYSIS_MODEL
 
@@ -193,6 +194,10 @@ def get_face_single(img_data: np.ndarray, face_index=0, det_size=(640, 640), gen
     face_analyser.prepare(ctx_id=0, det_size=det_size)
     face = face_analyser.get(img_data)
 
+    buffalo_path = os.path.join(models_path, "insightface/models/buffalo_l.zip")
+    if os.path.exists(buffalo_path):
+        os.remove(buffalo_path)
+
     if gender_source != 0:
         if len(face) == 0 and det_size[0] > 320 and det_size[1] > 320:
             return reget_face_single(img_data, det_size, face_index)
@@ -252,7 +257,7 @@ def swap_face(
         elif source_face is not None:
             
             result = target_img
-            model_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), model)
+            model_path = os.path.join(models_path, "insightface", model)
             face_swapper = getFaceSwapModel(model_path)
 
             source_face_idx = 0

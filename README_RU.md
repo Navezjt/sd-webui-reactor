@@ -1,16 +1,17 @@
 <div align="center">
 
-  <img src="example/ReActor_logo_red.png" alt="logo" width="180px"/>
-  
-  [![Commit activity](https://img.shields.io/github/commit-activity/t/Gourieff/sd-webui-reactor/main)](https://github.com/Gourieff/sd-webui-reactor/commits/main)
-  ![Last commit](https://img.shields.io/github/last-commit/Gourieff/sd-webui-reactor/main)
-  [![Opened issues](https://img.shields.io/github/issues/Gourieff/sd-webui-reactor?color=red)](https://github.com/Gourieff/sd-webui-reactor/issues)
-  [![Closed issues](https://img.shields.io/github/issues-closed/Gourieff/sd-webui-reactor?color=green)](https://github.com/Gourieff/sd-webui-reactor/issues?q=is%3Aissue+is%3Aclosed)
-  ![GitHub](https://img.shields.io/github/license/Gourieff/sd-webui-reactor)
+  <img src="example/ReActor_logo_red.png" alt="logo" width="180px" style="margin-bottom:-33px"/>
+    
+  # ![Version](https://img.shields.io/badge/версия-0.4.0-brightgreen?style=for-the-badge&labelColor=darkgreen)
+  [![Commit activity](https://img.shields.io/github/commit-activity/t/Gourieff/sd-webui-reactor/main?cacheSeconds=0)](https://github.com/Gourieff/sd-webui-reactor/commits/main)
+  ![Last commit](https://img.shields.io/github/last-commit/Gourieff/sd-webui-reactor/main?cacheSeconds=0)
+  [![Opened issues](https://img.shields.io/github/issues/Gourieff/sd-webui-reactor?color=red)](https://github.com/Gourieff/sd-webui-reactor/issues?cacheSeconds=0)
+  [![Closed issues](https://img.shields.io/github/issues-closed/Gourieff/sd-webui-reactor?color=green&cacheSeconds=0)](https://github.com/Gourieff/sd-webui-reactor/issues?q=is%3Aissue+is%3Aclosed)
+  ![License](https://img.shields.io/github/license/Gourieff/sd-webui-reactor)
 
   [English](/README.md) | Русский
 
-# ReActor 0.4.0b для StableDiffusion
+# ReActor для StableDiffusion
 ### Расширение для быстрой и простой замены лиц на любых изображениях. Без фильтра цензуры, 18+, используйте под вашу собственную [ответственность](#disclaimer)
 
 </div>

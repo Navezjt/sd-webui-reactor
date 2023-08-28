@@ -5,10 +5,14 @@ from tqdm import tqdm
 import urllib.request
 from packaging import version as pv
 
+from modules.paths_internal import models_path
+
 req_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "requirements.txt")
 
-models_dir = os.path.abspath("models/roop")
-
+models_dir_old = os.path.join(models_path, "roop")
+models_dir = os.path.join(models_path, "insightface")
+if os.path.exists(models_dir_old):
+    os.rename(models_dir_old, models_dir)
 model_url = "https://github.com/facefusion/facefusion-assets/releases/download/models/inswapper_128.onnx"
 model_name = os.path.basename(model_url)
 model_path = os.path.join(models_dir, model_name)

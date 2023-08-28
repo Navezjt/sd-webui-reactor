@@ -1,4 +1,7 @@
+import os, glob
 import gradio as gr
+from PIL import Image
+
 import modules.scripts as scripts
 from modules.upscaler import Upscaler, UpscalerData
 from modules import scripts, shared, images, scripts_postprocessing
@@ -6,22 +9,21 @@ from modules.processing import (
     StableDiffusionProcessing,
     StableDiffusionProcessingImg2Img,
 )
-from PIL import Image
-import glob
 from modules.face_restoration import FaceRestoration
+from modules.paths_internal import models_path
 
 from scripts.logger import logger
 from scripts.swapper import UpscaleOptions, swap_face, check_process_halt, reset_messaged
 from scripts.version import version_flag, app_title
 from scripts.console_log_patch import apply_logging_patch
-import os
+
 
 MODELS_PATH = None
 
 def get_models():
     global MODELS_PATH
-    models_path = os.path.join(scripts.basedir(), "models/roop/*")
-    models = glob.glob(models_path)
+    models_path_init = os.path.join(models_path, "insightface/*")
+    models = glob.glob(models_path_init)
     models = [x for x in models if x.endswith(".onnx") or x.endswith(".pth")]
     models_names = []
     for model in models:
