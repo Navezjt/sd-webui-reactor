@@ -262,6 +262,8 @@ def swap_face(
 
             source_face_idx = 0
 
+            swapped = 0
+
             for face_num in faces_index:
                 if len(source_faces_index) > 1 and source_face_idx > 0:
                     source_face, wrong_gender = get_face_single(source_img, face_index=source_faces_index[source_face_idx], gender_source=gender_source)
@@ -271,6 +273,7 @@ def swap_face(
                     target_face, wrong_gender = get_face_single(target_img, face_index=face_num, gender_target=gender_target)
                     if target_face is not None and wrong_gender == 0:
                         result = face_swapper.get(result, target_face, source_face)
+                        swapped += 1
                     elif wrong_gender == 1:
                         wrong_gender = 0
                         if source_face_idx == len(source_faces_index):
@@ -291,7 +294,7 @@ def swap_face(
                     logger.info(f"No source face found for face number {source_face_idx}.")
 
             result_image = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
-            if upscale_options is not None and target_face is not None:
+            if upscale_options is not None and swapped > 0:
                 result_image = upscale_image(result_image, upscale_options)
 
         else:
