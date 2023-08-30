@@ -15,7 +15,7 @@
 
 </div>
 
-### The Fast and Simple "[roop-based](https://github.com/s0md3v/sd-webui-roop)" FaceSwap Extension with a lot of improvements and without NSFW filter (uncensored, use it on your own [responsibility](#disclaimer)) 
+### The Fast and Simple FaceSwap Extension with a lot of improvements and without NSFW filter (uncensored, use it on your own [responsibility](#disclaimer)) 
 
 > Ex "Roop-GE" (GE - Gourieff Edition, aka "NSFW-Roop"), the extension was renamed with the version 0.3.0<br>
 > Repository old link: `https://github.com/Gourieff/sd-webui-roop-nsfw`
@@ -77,7 +77,7 @@
 6. Please, wait for several minutes until the installation process will be finished
 7. Check the last message in your SD.Next Console:
 * If you see the message "--- PLEASE, RESTART the Server! ---" - so, do it, stop the Server (CTRL+C or CMD+C) and start it again - or just go to the "Installed" tab (*if you have any other Roop-based extension enabled - disable it, otherwise this extension won't work*), click "Restart the UI"
-8. Stop SD.Next, go to the `automatic\extensions\sd-webui-reactor` directory - if you see there `models\roop` folder with the file `inswapper_128.onnx`, just move the file to the `automatic\models\roop` folder
+8. Stop SD.Next, go to the `automatic\extensions\sd-webui-reactor` directory - if you see there `models\insightface` folder with the file `inswapper_128.onnx`, just move the file to the `automatic\models\insightface` folder
 9. Run your SD.Next WebUI and enjoy!
 
 <a name="colab">If you use [Cagliostro Colab UI](https://github.com/Linaqruf/sd-notebook-collection):
@@ -110,7 +110,7 @@ Select the face numbers you wish to swap using the "Comma separated face number(
 <img src="example/multiple-faces.png" alt="example"/>
 
 ### ~~The result is totally black~~
-~~This means roop detected that your image is NSFW.~~
+~~This means NSFW filter detected that your image is NSFW.~~
 
 <img src="example/IamSFW.jpg" alt="IamSFW" width="50%"/>
 
@@ -118,7 +118,7 @@ Select the face numbers you wish to swap using the "Comma separated face number(
 
 You can choose to activate the swap on the source image or on the generated image, or on both using the checkboxes. Activating on source image allows you to start from a given base and apply the diffusion process to it.
 
-Inpainting should work but only the masked part will be swapped.
+ReActor works with Inpainting - but only the masked part will be swapped.<br>Please use with the "Only masked" option for "Inpaint area" if you enabled "Upscaler".
 
 ## API
 
@@ -130,7 +130,7 @@ Please follow **[this](/API.md)** page for the detailed instruction.
 
 **I. "You should at least have one model in models directory"**
 
-Please, check the path where "inswapper_128.onnx" model is stored. It must be inside the folder `stable-diffusion-webui\models\roop`. Move the model there if it's stored in a different directory.
+Please, check the path where "inswapper_128.onnx" model is stored. It must be inside the folder `stable-diffusion-webui\models\insightface`. Move the model there if it's stored in a different directory.
 
 **II. Any problems with installing Insightface or other dependencies**
 
@@ -169,12 +169,12 @@ Alternative solutions:
 
 You need to disable the "SD-CN-Animation" extension (or perhaps some another that causes the conflict)
 
-**V. "INVALID_PROTOBUF : Load model from <...>\models/roop\inswapper_128.onnx failed:Protobuf parsing failed"**
+**V. "INVALID_PROTOBUF : Load model from <...>\models\insightface\inswapper_128.onnx failed:Protobuf parsing failed"**
 
 This error may occur if there's smth wrong with the model file `inswapper_128.onnx`
 
 Try to download it manually from [here](https://github.com/facefusion/facefusion-assets/releases/download/models/inswapper_128.onnx)
-and put it to the `stable-diffusion-webui\models\roop` replacing existing one
+and put it to the `stable-diffusion-webui\models\insightface` replacing existing one
 
 **VI. "ValueError: This ORT build has ['TensorrtExecutionProvider', 'CUDAExecutionProvider', 'CPUExecutionProvider'] enabled"**
 
