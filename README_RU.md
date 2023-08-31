@@ -2,7 +2,7 @@
 
   <img src="example/ReActor_logo_red.png" alt="logo" width="180px"/>
     
-  ![Version](https://img.shields.io/badge/версия-0.4.1_beta1-green?style=for-the-badge&labelColor=darkgreen)<hr>
+  ![Version](https://img.shields.io/badge/версия-0.4.1_beta2-green?style=for-the-badge&labelColor=darkgreen)<hr>
   [![Commit activity](https://img.shields.io/github/commit-activity/t/Gourieff/sd-webui-reactor/main?cacheSeconds=0)](https://github.com/Gourieff/sd-webui-reactor/commits/main)
   ![Last commit](https://img.shields.io/github/last-commit/Gourieff/sd-webui-reactor/main?cacheSeconds=0)
   [![Opened issues](https://img.shields.io/github/issues/Gourieff/sd-webui-reactor?color=red)](https://github.com/Gourieff/sd-webui-reactor/issues?cacheSeconds=0)
@@ -118,7 +118,7 @@
 
 Используйте эту вкладку, чтобы заменить лицо на уже готовом изображении (флажок "Swap in source image") или на сгенерированном на основе готового (флажок "Swap in generated image").
 
-Inpainting также работает, но замена лица происходит только в области маски.<br>Пожалуйста, используйте с опцией "Only masked" для "Inpaint area", если вы применяете "Upscaler".
+Inpainting также работает, но замена лица происходит только в области маски.<br>Пожалуйста, используйте с опцией "Only masked" для "Inpaint area", если вы применяете "Upscaler". Иначе, используйте функцию увеличения (апскейла) через вкладку "Extras" или через опциональный загрузчик "Script" (внизу экрана), применив "SD upscale" или "Ultimate SD upscale".
 
 ## API
 

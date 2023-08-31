@@ -44,48 +44,61 @@ class FaceSwapScript(scripts.Script):
 
     def ui(self, is_img2img):
         with gr.Accordion(f"{app_title}", open=False):
-            with gr.Column():
-                img = gr.inputs.Image(type="pil")
-                enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple \"roop-based\" FaceSwap Extension - {version_flag}")
-                gr.Markdown("---")
-                gr.Markdown("Source Image (above):")
-                with gr.Row():
-                    source_faces_index = gr.Textbox(
-                        value="0",
-                        placeholder="Which face(s) to use as Source (comma separated)",
-                        label="Comma separated face number(s); Example: 0,2,1",
+            with gr.Tab("Input"):
+                with gr.Column():
+                    img = gr.inputs.Image(type="pil")
+                    enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple FaceSwap Extension - {version_flag}")
+                    gr.Markdown("<br>")
+                    gr.Markdown("Source Image (above):")
+                    with gr.Row():
+                        source_faces_index = gr.Textbox(
+                            value="0",
+                            placeholder="Which face(s) to use as Source (comma separated)",
+                            label="Comma separated face number(s); Example: 0,2,1",
+                        )
+                        gender_source = gr.Radio(
+                            ["No", "Female Only", "Male Only"],
+                            value="No",
+                            label="Gender Detection (Source)",
+                            type="index",
+                        )
+                    gr.Markdown("<br>")
+                    gr.Markdown("Target Image (result):")
+                    with gr.Row():
+                        faces_index = gr.Textbox(
+                            value="0",
+                            placeholder="Which face(s) to Swap into Target (comma separated)",
+                            label="Comma separated face number(s); Example: 1,0,2",
+                        )
+                        gender_target = gr.Radio(
+                            ["No", "Female Only", "Male Only"],
+                            value="No",
+                            label="Gender Detection (Target)",
+                            type="index",
+                        )
+                    gr.Markdown("<br>")
+                    with gr.Row():
+                        face_restorer_name = gr.Radio(
+                            label="Restore Face",
+                            choices=["None"] + [x.name() for x in shared.face_restorers],
+                            value=shared.face_restorers[0].name(),
+                            type="value",
+                        )
+                        face_restorer_visibility = gr.Slider(
+                            0, 1, 1, step=0.1, label="Restore Face Visibility"
+                        )
+                    gr.Markdown("<br>")
+                    swap_in_source = gr.Checkbox(
+                        False,
+                        label="Swap in source image",
+                        visible=is_img2img,
                     )
-                    gender_source = gr.Radio(
-                        ["No", "Female Only", "Male Only"],
-                        value="No",
-                        label="Gender Detection (Source)",
-                        type="index",
-                    )
-                gr.Markdown("---")
-                gr.Markdown("Target Image (result):")
-                with gr.Row():
-                    faces_index = gr.Textbox(
-                        value="0",
-                        placeholder="Which face(s) to Swap into Target (comma separated)",
-                        label="Comma separated face number(s); Example: 1,0,2",
-                    )
-                    gender_target = gr.Radio(
-                        ["No", "Female Only", "Male Only"],
-                        value="No",
-                        label="Gender Detection (Target)",
-                        type="index",
-                    )
-                gr.Markdown("---")
-                with gr.Row():
-                    face_restorer_name = gr.Radio(
-                        label="Restore Face",
-                        choices=["None"] + [x.name() for x in shared.face_restorers],
-                        value=shared.face_restorers[0].name(),
-                        type="value",
-                    )
-                    face_restorer_visibility = gr.Slider(
-                        0, 1, 1, step=0.1, label="Restore Face Visibility"
-                    )
+                    swap_in_generated = gr.Checkbox(
+                        True,
+                        label="Swap in generated image",
+                        visible=is_img2img,
+                    )                    
+            with gr.Tab("Upscale"):
                 restore_first = gr.Checkbox(
                     True,
                     label="1. Restore Face -> 2. Upscale (-Uncheck- if you want vice versa)",
@@ -95,23 +108,13 @@ class FaceSwapScript(scripts.Script):
                     choices=[upscaler.name for upscaler in shared.sd_upscalers],
                     label="Upscaler",
                 )
+                gr.Markdown("<br>")
                 with gr.Row():
                     upscaler_scale = gr.Slider(1, 8, 1, step=0.1, label="Scale by")
                     upscaler_visibility = gr.Slider(
                         0, 1, 1, step=0.1, label="Upscaler Visibility (if scale = 1)"
                     )
-                gr.Markdown("---")
-                swap_in_source = gr.Checkbox(
-                    False,
-                    label="Swap in source image",
-                    visible=is_img2img,
-                )
-                swap_in_generated = gr.Checkbox(
-                    True,
-                    label="Swap in generated image",
-                    visible=is_img2img,
-                )
-                
+            with gr.Tab("Settings"):
                 models = get_models()
                 with gr.Row():
                     if len(models) == 0:
@@ -132,7 +135,6 @@ class FaceSwapScript(scripts.Script):
                         label="Console Log Level",
                         type="index",
                     )
-                gr.Markdown("---")
 
         return [
             img,

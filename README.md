@@ -2,7 +2,7 @@
 
   <img src="example/ReActor_logo_red.png" alt="logo" width="180px"/>
     
-  ![Version](https://img.shields.io/badge/version-0.4.1_beta1-green?style=for-the-badge&labelColor=darkgreen)<hr>
+  ![Version](https://img.shields.io/badge/version-0.4.1_beta2-green?style=for-the-badge&labelColor=darkgreen)<hr>
   [![Commit activity](https://img.shields.io/github/commit-activity/t/Gourieff/sd-webui-reactor/main?cacheSeconds=0)](https://github.com/Gourieff/sd-webui-reactor/commits/main)
   ![Last commit](https://img.shields.io/github/last-commit/Gourieff/sd-webui-reactor/main?cacheSeconds=0)
   [![Opened issues](https://img.shields.io/github/issues/Gourieff/sd-webui-reactor?color=red)](https://github.com/Gourieff/sd-webui-reactor/issues?cacheSeconds=0)
@@ -118,7 +118,7 @@ Select the face numbers you wish to swap using the "Comma separated face number(
 
 You can choose to activate the swap on the source image or on the generated image, or on both using the checkboxes. Activating on source image allows you to start from a given base and apply the diffusion process to it.
 
-ReActor works with Inpainting - but only the masked part will be swapped.<br>Please use with the "Only masked" option for "Inpaint area" if you enabled "Upscaler".
+ReActor works with Inpainting - but only the masked part will be swapped.<br>Please use with the "Only masked" option for "Inpaint area" if you enabled "Upscaler". Otherwise use the upscale option via the Extras tab or via the Script loader (below the screen) with "SD upscale" or "Ultimate SD upscale".
 
 ## API
 
