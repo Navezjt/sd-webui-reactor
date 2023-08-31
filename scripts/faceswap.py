@@ -2,20 +2,25 @@ import os, glob
 import gradio as gr
 from PIL import Image
 
+from typing import List
+
 import modules.scripts as scripts
 from modules.upscaler import Upscaler, UpscalerData
 from modules import scripts, shared, images, scripts_postprocessing
 from modules.processing import (
+    Processed,
     StableDiffusionProcessing,
     StableDiffusionProcessingImg2Img,
 )
 from modules.face_restoration import FaceRestoration
 from modules.paths_internal import models_path
+from modules.images import save_image
 
 from scripts.logger import logger
 from scripts.swapper import UpscaleOptions, swap_face, check_process_halt, reset_messaged
 from scripts.version import version_flag, app_title
 from scripts.console_log_patch import apply_logging_patch
+from scripts.helpers import make_grid
 
 
 MODELS_PATH = None
@@ -44,10 +49,11 @@ class FaceSwapScript(scripts.Script):
 
     def ui(self, is_img2img):
         with gr.Accordion(f"{app_title}", open=False):
-            with gr.Tab("Input"):
+            with gr.Tab("Main"):
                 with gr.Column():
                     img = gr.inputs.Image(type="pil")
                     enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple FaceSwap Extension - {version_flag}")
+                    save_original = gr.Checkbox(False, label="Save Original", info="Save the original image(s) made before swapping; If you use \"img2img\" - this option will affect with \"Swap in generated\" only")
                     gr.Markdown("<br>")
                     gr.Markdown("Source Image (above):")
                     with gr.Row():
@@ -153,6 +159,7 @@ class FaceSwapScript(scripts.Script):
             console_logging_level,
             gender_source,
             gender_target,
+            save_original,
         ]
 
 
@@ -200,6 +207,7 @@ class FaceSwapScript(scripts.Script):
         console_logging_level,
         gender_source,
         gender_target,
+        save_original,
     ):
         self.enable = enable
         if self.enable:
@@ -221,6 +229,7 @@ class FaceSwapScript(scripts.Script):
             self.console_logging_level = console_logging_level
             self.gender_source = gender_source
             self.gender_target = gender_target
+            self.save_original = save_original
             if self.gender_source is None or self.gender_source == "No":
                 self.gender_source = 0
             if self.gender_target is None or self.gender_target == "No":
@@ -242,7 +251,8 @@ class FaceSwapScript(scripts.Script):
                     logger.info("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
 
                     for i in range(len(p.init_images)):
-                        logger.info("Swap in %s", i)
+                        if len(p.init_images) > 1:
+                            logger.info("Swap in %s", i)
                         result = swap_face(
                             self.source,
                             p.init_images[i],
@@ -261,12 +271,67 @@ class FaceSwapScript(scripts.Script):
             else:
                 logger.error("Please provide a source face")
 
-    def postprocess_batch(self, p, *args, **kwargs):
+    def postprocess(self, p: StableDiffusionProcessing, processed: Processed, *args):
         if self.enable:
+
+            reset_messaged()
+            if check_process_halt():
+                return
+
+            if self.save_original:
+
+                postprocess_run: bool = True
+
+                orig_images : List[Image.Image] = processed.images[processed.index_of_first_image:]
+                orig_infotexts : List[str] = processed.infotexts[processed.index_of_first_image:]
+
+                result_images: List = processed.images
+
+                if self.swap_in_generated:
+                    logger.info("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
+                    if self.source is not None:
+                        for i,(img,info) in enumerate(zip(orig_images, orig_infotexts)):
+                            if check_process_halt():
+                                postprocess_run = False
+                                break
+                            if len(orig_images) > 1:
+                                logger.info("Swap in %s", i)
+                            result = swap_face(
+                                self.source,
+                                img,
+                                source_faces_index=self.source_faces_index,
+                                faces_index=self.faces_index,
+                                model=self.model,
+                                upscale_options=self.upscale_options,
+                                gender_source=self.gender_source,
+                                gender_target=self.gender_target,
+                            )
+                            if result is not None:
+                                suffix = "-swapped"
+                                result_images.append(result)
+                                try:
+                                    save_image(result, p.outpath_samples, "", p.all_seeds[0], p.all_prompts[0], "png",info=info, p=p, suffix=suffix)
+                                except:
+                                    logger.error("Cannot save a result image - please, check SD WebUI Settings (Saving and Paths)")
+                            else:
+                                logger.error("Cannot create a result image")
+                
+                if shared.opts.return_grid and len(result_images) > 2 and postprocess_run:
+                    grid = make_grid(result_images)
+                    result_images.insert(0, grid)
+                    try:
+                        save_image(grid, p.outpath_grids, "grid", p.all_seeds[0], p.all_prompts[0], shared.opts.grid_format, info=info, short_filename=not shared.opts.grid_extended_filename, p=p, grid=True)
+                    except:
+                        logger.error("Cannot save a grid - please, check SD WebUI Settings (Saving and Paths)")
+                
+                processed.images = result_images   
+    
+    def postprocess_batch(self, p, *args, **kwargs):
+        if self.enable and not self.save_original:
             images = kwargs["images"]
 
     def postprocess_image(self, p, script_pp: scripts.PostprocessImageArgs, *args):
-        if self.enable and self.swap_in_generated:
+        if self.enable and self.swap_in_generated and not self.save_original:
 
             current_job_number = shared.state.job_no + 1
             job_count = shared.state.job_count
@@ -274,7 +339,7 @@ class FaceSwapScript(scripts.Script):
                 reset_messaged()
             if check_process_halt():
                 return
-           
+            
             if self.source is not None:
                 logger.info("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
                 image: Image.Image = script_pp.image

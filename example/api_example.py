@@ -8,7 +8,7 @@ time = datetime.now()
 today = date.today()
 current_date = today.strftime('%Y-%m-%d')
 current_time = time.strftime('%H-%M-%S')
-output_file = 'outputs/api/output_'+current_date+'_'+current_time+'.png' # Output file path
+output = 'outputs/api/output_'+current_date+'_'+current_time # Output file path + name index
 try:
     im = Image.open(input_file)
 except Exception as e:
@@ -26,7 +26,7 @@ args=[
     True, #1 Enable ReActor
     '0', #2 Comma separated face number(s) from swap-source image
     '0', #3 Comma separated face number(s) for target image (result)
-    'C:\stable-diffusion-webui\models/roop\inswapper_128.onnx', #4 model path
+    'C:\stable-diffusion-webui\models\insightface\inswapper_128.onnx', #4 model path
     'CodeFormer', #4 Restore Face: None; CodeFormer; GFPGAN
     1, #5 Restore visibility value
     True, #7 Restore face -> Upscale
@@ -38,6 +38,7 @@ args=[
     1, #13 Console Log Level (0 - min, 1 - med or 2 - max)
     0, #14 Gender Detection (Source) (0 - No, 1 - Female Only, 2 - Male Only)
     0, #15 Gender Detection (Target) (0 - No, 1 - Female Only, 2 - Male Only)
+    False, #16 Save the original image(s) made before swapping
 ]
 
 # The args for ReActor can be found by 
@@ -70,6 +71,7 @@ finally:
 
 if result is not None:
     r = result.json()
+    n = 0
 
     for i in r['images']:
         image = Image.open(io.BytesIO(base64.b64decode(i.split(",",1)[0])))
@@ -81,11 +83,13 @@ if result is not None:
 
         pnginfo = PngImagePlugin.PngInfo()
         pnginfo.add_text("parameters", response2.json().get("info"))
+        output_file = output+'_'+str(n)+'_.png'
         try:
             image.save(output_file, pnginfo=pnginfo)
         except Exception as e:
             print(e)
         finally:
             print(f'{output_file} is saved\nAll is done!')
+        n += 1
 else:
     print('Something went wrong...')
