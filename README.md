@@ -23,7 +23,7 @@
 ---
 <div align="center">
   <b>
-    <a href="#installation">Installation</a> | <a href="#usage">Usage</a> | <a href="#api">API</a> | <a href="#troubleshooting">Troubleshooting</a> | <a href="#updating">Updating</a> | <a href="#comfyui">ComfyUI</a> | <a href="#disclaimer">Disclaimer</a>
+    <a href="#installation">Installation</a> | <a href="#features">Features</a> | <a href="#usage">Usage</a> | <a href="#api">API</a> | <a href="#troubleshooting">Troubleshooting</a> | <a href="#updating">Updating</a> | <a href="#comfyui">ComfyUI</a> | <a href="#disclaimer">Disclaimer</a>
   </b>
 </div>
 
@@ -87,6 +87,23 @@
 3. When you see the message "--- PLEASE, RESTART the Server! ---" (in your Colab Notebook Start UI section "Start Cagliostro Colab UI") - just go to the "Installed" tab and click "Apply and restart UI" (*if you have any other Roop-based extension enabled - disable it before restart, otherwise this extension won't work*)
 4. Enjoy!
 
+## Features
+
+- Very fast and accurate **face replacement (face swap)** in images
+- **Multiple faces support**
+- **Gender detection**
+- Ability to **save original images** (made before swapping)
+- **Face restoration** of a swapped face
+- **Upscaling** of a resulting image
+- Ability to set the **Postprocessing order**
+- **100% compatibility** with different **SD WebUIs**: Automatic1111, SD.Next, Cagliostro Colab UI
+- **Fast performance** even with CPU, ReActor for SD WebUI is absolutely not picky about how powerful your GPU is
+- **[API](/API.md) support**: both SD WebUI built-in and external (via POST/GET requests)
+- **ComfyUI [support](https://github.com/Gourieff/comfyui-reactor-node)**
+- **Mac M1/M2 [support](https://github.com/Gourieff/sd-webui-reactor/issues/42)**
+- Console **log level control**
+- **NSFW filter free** (this extension is aimed at highly developed intellectual people, not at perverts; our society must be oriented on its way towards the highest standards, not the lowest - this is the essence of development and evolution; so, my position is - that mature-minded people are clever enough to understand for themselves what is good and what is bad and take full responsibility for personal actions; for others - no "filters" will help until they do understand how Universe works)
+
 ## Usage
 
 > Using this software you are agree with [disclaimer](#disclaimer)
@@ -128,11 +145,11 @@ Please follow **[this](/API.md)** page for the detailed instruction.
 
 ## Troubleshooting
 
-**I. "You should at least have one model in models directory"**
+### **I. "You should at least have one model in models directory"**
 
 Please, check the path where "inswapper_128.onnx" model is stored. It must be inside the folder `stable-diffusion-webui\models\insightface`. Move the model there if it's stored in a different directory.
 
-**II. Any problems with installing Insightface or other dependencies**
+### **II. Any problems with installing Insightface or other dependencies**
 
 (for Mac M1/M2 users) If you get errors when trying to install Insightface - please read https://github.com/Gourieff/sd-webui-reactor/issues/42
 
@@ -154,7 +171,7 @@ Please, check the path where "inswapper_128.onnx" model is stored. It must be in
    - `pip install tqdm`
 8. Type `deactivate`, you can close your Terminal or Console and start your SD WebUI, ReActor should start OK - if not, welcome to the Issues section.
 
-**III. "TypeError: UpscaleOptions.init() got an unexpected keyword argument 'do_restore_first'"**
+### **III. "TypeError: UpscaleOptions.init() got an unexpected keyword argument 'do_restore_first'"**
 
 First of all - you need to disable any other Roop-based extensions:
 - Go to 'Extensions -> Installed' tab and uncheck any Roop-based extensions except this one
@@ -165,18 +182,18 @@ Alternative solutions:
 - https://github.com/Gourieff/sd-webui-reactor/issues/3#issuecomment-1615919243
 - https://github.com/Gourieff/sd-webui-reactor/issues/39#issuecomment-1666559134 (can be actual, if you use Vladmandic SD.Next)
 
-**IV. "AttributeError: 'FaceSwapScript' object has no attribute 'enable'"**
+### **IV. "AttributeError: 'FaceSwapScript' object has no attribute 'enable'"**
 
 You need to disable the "SD-CN-Animation" extension (or perhaps some another that causes the conflict)
 
-**V. "INVALID_PROTOBUF : Load model from <...>\models\insightface\inswapper_128.onnx failed:Protobuf parsing failed"**
+### **V. "INVALID_PROTOBUF : Load model from <...>\models\insightface\inswapper_128.onnx failed:Protobuf parsing failed"**
 
 This error may occur if there's smth wrong with the model file `inswapper_128.onnx`
 
 Try to download it manually from [here](https://github.com/facefusion/facefusion-assets/releases/download/models/inswapper_128.onnx)
 and put it to the `stable-diffusion-webui\models\insightface` replacing existing one
 
-**VI. "ValueError: This ORT build has ['TensorrtExecutionProvider', 'CUDAExecutionProvider', 'CPUExecutionProvider'] enabled"**
+### **VI. "ValueError: This ORT build has ['TensorrtExecutionProvider', 'CUDAExecutionProvider', 'CPUExecutionProvider'] enabled"**
 
 1. Close (stop) your SD WebUI Server if it's running
 2. Go to the (Windows)`venv\Lib\site-packages` or (MacOS/Linux)`venv/lib/python3.10/site-packages` and see if there are any folders with names start from "~" (for example "~rotobuf"), delete them
@@ -188,7 +205,7 @@ and put it to the `stable-diffusion-webui\models\insightface` replacing existing
 
 If it didn't help - it seems that you have another extension reinstalling `onnxruntime` when SD WebUI checks requirements. Please see your extensions list. If you find there "WD14 tagger" - try to disable it and then follow the steps above once again. This extension causes reinstalling of `onnxruntime` to `onnxruntime-gpu` every time SD WebUI runs.
 
-**VII. "ImportError: cannot import name 'builder' from 'google.protobuf.internal'"**
+### **VII. "ImportError: cannot import name 'builder' from 'google.protobuf.internal'"**
 
 1. Close (stop) your SD WebUI Server if it's running
 2. Go to the (Windows)`venv\Lib\site-packages` or (MacOS/Linux)`venv/lib/python3.10/site-packages` and see if there are any folders with names start from "~" (for example "~rotobuf"), delete them
@@ -201,7 +218,9 @@ If it didn't help - it seems that you have another extension reinstalling `onnxr
 
 If this method doesn't help - there is some other extension that has a higher version of protobuf dependence and SD WebUI installs it on a startup requirements check
 
-<a name="insightfacebuild">**VIII. (For Windows users) If you still cannot build Insightface for some reasons or just don't want to install Visual Studio or VS C++ Build Tools - do the following:**
+<a name="insightfacebuild">
+
+### **VIII. (For Windows users) If you still cannot build Insightface for some reasons or just don't want to install Visual Studio or VS C++ Build Tools - do the following:**
 
 1. Close (stop) your SD WebUI Server if it's running
 2. Download and put [prebuilt Insightface package](https://github.com/Gourieff/sd-webui-reactor/raw/main/example/insightface-0.7.3-cp310-cp310-win_amd64.whl) into the stable-diffusion-webui (or SD.Next) root folder (where you have "webui-user.bat" file)
@@ -210,7 +229,7 @@ If this method doesn't help - there is some other extension that has a higher ve
 5. Then install Insightface: `pip install insightface-0.7.3-cp310-cp310-win_amd64.whl`
 6. Enjoy!
 
-**IX. 07-August Update problem**
+### **IX. 07-August-23 Update problem**
 
 If after `git pull` you see the message: `Merge made by the 'recursive' strategy` and then when you check `git status` you see `Your branch is ahead of 'origin/main' by`
 
