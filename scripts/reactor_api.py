@@ -14,8 +14,8 @@ from modules.api import api
 
 import gradio as gr
 
-from scripts.swapper import UpscaleOptions, swap_face
-from scripts.logger import logger
+from scripts.reactor_swapper import UpscaleOptions, swap_face
+from scripts.reactor_logger import logger
 
 
 def default_file_path():

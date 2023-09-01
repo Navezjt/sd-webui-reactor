@@ -3,7 +3,7 @@ import copy
 import sys
 
 from modules import shared
-from scripts.globals import IS_RUN
+from scripts.reactor_globals import IS_RUN
 
 
 class ColoredFormatter(logging.Formatter):

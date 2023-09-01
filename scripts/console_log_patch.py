@@ -14,7 +14,7 @@ from insightface.model_zoo import model_zoo
 import onnxruntime
 import onnx
 from onnx import numpy_helper
-from scripts.logger import logger
+from scripts.reactor_logger import logger
 
 
 def patched_get_model(self, **kwargs):

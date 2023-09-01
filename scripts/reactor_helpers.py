@@ -4,16 +4,6 @@ from math import isqrt, ceil
 from typing import List
 
 def make_grid(image_list: List):
-    """
-    Creates a square image by combining multiple images in a grid pattern.
-    
-    Args:
-        image_list (list): List of PIL Image objects to be combined.
-        
-    Returns:
-        PIL Image object: The resulting square image.
-        None: If the image_list is empty or contains only one image.
-    """
     
     # Count the occurrences of each image size in the image_list
     size_counter = Counter(image.size for image in image_list)
