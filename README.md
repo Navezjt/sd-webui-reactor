@@ -186,7 +186,7 @@ Alternative solutions:
 
 You need to disable the "SD-CN-Animation" extension (or perhaps some another that causes the conflict)
 
-### **V. "INVALID_PROTOBUF : Load model from <...>\models\insightface\inswapper_128.onnx failed:Protobuf parsing failed"**
+### **V. "INVALID_PROTOBUF : Load model from <...>\models\insightface\inswapper_128.onnx failed:Protobuf parsing failed" OR "AttributeError: 'NoneType' object has no attribute 'get'"**
 
 This error may occur if there's smth wrong with the model file `inswapper_128.onnx`
 

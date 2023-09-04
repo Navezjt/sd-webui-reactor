@@ -190,7 +190,7 @@ Inpainting также работает, но замена лица происх�
 
 Отключите расширение "SD-CN-Animation" (или какое-либо другое, вызывающее конфликт)
 
-### **V. "INVALID_PROTOBUF : Load model from <...>\models\insightface\inswapper_128.onnx failed:Protobuf parsing failed"**
+### **V. "INVALID_PROTOBUF : Load model from <...>\models\insightface\inswapper_128.onnx failed:Protobuf parsing failed" ИЛИ "AttributeError: 'NoneType' object has no attribute 'get'"**
 
 Эта ошибка появляется, если что-то не так с файлом модели `inswapper_128.onnx`.
 
