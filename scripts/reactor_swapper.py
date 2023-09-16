@@ -8,7 +8,6 @@ import numpy as np
 from PIL import Image
 
 import insightface
-import onnxruntime
 
 from modules.face_restoration import FaceRestoration
 from modules.upscaler import UpscalerData
@@ -21,35 +20,17 @@ import warnings
 np.warnings = warnings
 np.warnings.filterwarnings('ignore')
 
-providers = onnxruntime.get_available_providers()
+providers = ["CPUExecutionProvider"]
 
 
 @dataclass
-class UpscaleOptions:
+class EnhancementOptions:
     do_restore_first: bool = True
     scale: int = 1
     upscaler: UpscalerData = None
     upscale_visibility: float = 0.5
     face_restorer: FaceRestoration = None
     restorer_visibility: float = 0.5
-
-
-def cosine_distance(vector1: np.ndarray, vector2: np.ndarray) -> float:
-    vec1 = vector1.flatten()
-    vec2 = vector2.flatten()
-
-    dot_product = np.dot(vec1, vec2)
-    norm1 = np.linalg.norm(vec1)
-    norm2 = np.linalg.norm(vec2)
-
-    cosine_distance = 1 - (dot_product / (norm1 * norm2))
-    return cosine_distance
-
-
-def cosine_similarity(test_vec: np.ndarray, source_vecs: List[np.ndarray]) -> float:
-    cos_dist = sum(cosine_distance(test_vec, source_vec) for source_vec in source_vecs)
-    average_cos_dist = cos_dist / len(source_vecs)
-    return average_cos_dist
 
 
 MESSAGED_STOPPED = False
@@ -102,76 +83,88 @@ def getFaceSwapModel(model_path: str):
     return FS_MODEL
 
 
-def upscale_image(image: Image, upscale_options: UpscaleOptions):
+def restore_face(image: Image, enhancement_options: EnhancementOptions):
+    result_image = image
+
+    if check_process_halt(msgforced=True):
+        return result_image
+    
+    if enhancement_options.face_restorer is not None:
+        original_image = result_image.copy()
+        logger.info("Restoring the face with %s", enhancement_options.face_restorer.name())
+        numpy_image = np.array(result_image)
+        numpy_image = enhancement_options.face_restorer.restore(numpy_image)
+        restored_image = Image.fromarray(numpy_image)
+        result_image = Image.blend(
+            original_image, restored_image, enhancement_options.restorer_visibility
+        )
+    
+    return result_image
+
+def upscale_image(image: Image, enhancement_options: EnhancementOptions):
+    result_image = image
+
+    if check_process_halt(msgforced=True):
+        return result_image
+    
+    if enhancement_options.upscaler is not None and enhancement_options.upscaler.name != "None":
+        original_image = result_image.copy()
+        logger.info(
+            "Upscaling with %s scale = %s",
+            enhancement_options.upscaler.name,
+            enhancement_options.scale,
+        )
+        result_image = enhancement_options.upscaler.scaler.upscale(
+            original_image, enhancement_options.scale, enhancement_options.upscaler.data_path
+        )
+        if enhancement_options.scale == 1:
+            result_image = Image.blend(
+                original_image, result_image, enhancement_options.upscale_visibility
+            )
+    
+    return result_image
+
+def enhance_image(image: Image, enhancement_options: EnhancementOptions):
     result_image = image
     
     if check_process_halt(msgforced=True):
         return result_image
     
-    if upscale_options.do_restore_first:
-        if upscale_options.face_restorer is not None:
-            original_image = result_image.copy()
-            logger.info("Restoring the face with %s", upscale_options.face_restorer.name())
-            numpy_image = np.array(result_image)
-            numpy_image = upscale_options.face_restorer.restore(numpy_image)
-            restored_image = Image.fromarray(numpy_image)
-            result_image = Image.blend(
-                original_image, restored_image, upscale_options.restorer_visibility
-            )
-        if upscale_options.upscaler is not None and upscale_options.upscaler.name != "None":
-            original_image = result_image.copy()
-            logger.info(
-                "Upscaling with %s scale = %s",
-                upscale_options.upscaler.name,
-                upscale_options.scale,
-            )
-            result_image = upscale_options.upscaler.scaler.upscale(
-                original_image, upscale_options.scale, upscale_options.upscaler.data_path
-            )
-            if upscale_options.scale == 1:
-                result_image = Image.blend(
-                    original_image, result_image, upscale_options.upscale_visibility
-                )
+    if enhancement_options.do_restore_first:
+        
+        result_image = restore_face(result_image, enhancement_options)
+        result_image = upscale_image(result_image, enhancement_options)
+
     else:
-        if upscale_options.upscaler is not None and upscale_options.upscaler.name != "None":
-            original_image = result_image.copy()
-            logger.info(
-                "Upscaling with %s scale = %s",
-                upscale_options.upscaler.name,
-                upscale_options.scale,
-            )
-            result_image = upscale_options.upscaler.scaler.upscale(
-                image, upscale_options.scale, upscale_options.upscaler.data_path
-            )
-            if upscale_options.scale == 1:
-                result_image = Image.blend(
-                    original_image, result_image, upscale_options.upscale_visibility
-                )
-        if upscale_options.face_restorer is not None:
-            original_image = result_image.copy()
-            logger.info("Restoring the face with %s", upscale_options.face_restorer.name())
-            numpy_image = np.array(result_image)
-            numpy_image = upscale_options.face_restorer.restore(numpy_image)
-            restored_image = Image.fromarray(numpy_image)
-            result_image = Image.blend(
-                original_image, restored_image, upscale_options.restorer_visibility
-            )
+
+        result_image = upscale_image(result_image, enhancement_options)
+        result_image = restore_face(result_image, enhancement_options)
 
     return result_image
 
-
-def get_face_gender(
-        face,
-        face_index,
-        gender_condition,
-        operated: str
-):
+def get_gender(face, face_index):
     gender = [
         x.sex
         for x in face
     ]
     gender.reverse()
-    face_gender = gender[face_index]
+    try:
+        face_gender = gender[face_index]
+    except:
+        logger.error("Gender Detection: No face with index = %s was found", face_index)
+        return "None"
+    return face_gender
+
+def get_face_gender(
+        face,
+        face_index,
+        gender_condition,
+        operated: str,
+        gender_detected,
+):
+    face_gender = gender_detected
+    if face_gender == "None":
+        return None, 0
     logger.info("%s Face %s: Detected Gender -%s-", operated, face_index, face_gender)
     if (gender_condition == 1 and face_gender == "F") or (gender_condition == 2 and face_gender == "M"):
         logger.info("OK - Detected Gender matches Condition")
@@ -183,10 +176,22 @@ def get_face_gender(
         logger.info("WRONG - Detected Gender doesn't match Condition")
         return sorted(face, key=lambda x: x.bbox[0])[face_index], 1
 
+def get_face_age(face, face_index):
+    age = [
+        x.age
+        for x in face
+    ]
+    age.reverse()
+    try:
+        face_age = age[face_index]
+    except:
+        logger.error("Age Detection: No face with index = %s was found", face_index)
+        return "None"
+    return face_age
 
-def reget_face_single(img_data, det_size, face_index):
+def reget_face_single(img_data, det_size, face_index, gender_source, gender_target):
     det_size_half = (det_size[0] // 2, det_size[1] // 2)
-    return get_face_single(img_data, face_index=face_index, det_size=det_size_half)
+    return get_face_single(img_data, face_index=face_index, det_size=det_size_half, gender_source=gender_source, gender_target=gender_target)
 
 
 def get_face_single(img_data: np.ndarray, face_index=0, det_size=(640, 640), gender_source=0, gender_target=0):
@@ -198,23 +203,39 @@ def get_face_single(img_data: np.ndarray, face_index=0, det_size=(640, 640), gen
     if os.path.exists(buffalo_path):
         os.remove(buffalo_path)
 
+    face_age = "None"
+    try:
+        face_age = get_face_age(face, face_index)
+    except:
+        logger.error("Cannot detect any Age for Face index = %s", face_index)
+    
+    face_gender = "None"
+    try:
+        face_gender = get_gender(face, face_index)
+        gender_detected = face_gender
+        face_gender = "Female" if face_gender == "F" else ("Male" if face_gender == "M" else "None")
+    except:
+        logger.error("Cannot detect any Gender for Face index = %s", face_index)
+    
     if gender_source != 0:
         if len(face) == 0 and det_size[0] > 320 and det_size[1] > 320:
-            return reget_face_single(img_data, det_size, face_index)
-        return get_face_gender(face,face_index,gender_source,"Source")
+            return reget_face_single(img_data, det_size, face_index, gender_source, gender_target)
+        faces, wrong_gender = get_face_gender(face,face_index,gender_source,"Source",gender_detected)
+        return faces, wrong_gender, face_age, face_gender
 
     if gender_target != 0:
         if len(face) == 0 and det_size[0] > 320 and det_size[1] > 320:
-            return reget_face_single(img_data, det_size, face_index)
-        return get_face_gender(face,face_index,gender_target,"Target")
+            return reget_face_single(img_data, det_size, face_index, gender_source, gender_target)
+        faces, wrong_gender = get_face_gender(face,face_index,gender_target,"Target",gender_detected)
+        return faces, wrong_gender, face_age, face_gender
     
     if len(face) == 0 and det_size[0] > 320 and det_size[1] > 320:
-        return reget_face_single(img_data, det_size, face_index)
+        return reget_face_single(img_data, det_size, face_index, gender_source, gender_target)
 
     try:
-        return sorted(face, key=lambda x: x.bbox[0])[face_index], 0
+        return sorted(face, key=lambda x: x.bbox[0])[face_index], 0, face_age, face_gender
     except IndexError:
-        return None, 0
+        return None, 0, face_age, face_gender
 
 
 def swap_face(
@@ -223,7 +244,7 @@ def swap_face(
     model: Union[str, None] = None,
     source_faces_index: List[int] = [0],
     faces_index: List[int] = [0],
-    upscale_options: Union[UpscaleOptions, None] = None,
+    enhancement_options: Union[EnhancementOptions, None] = None,
     gender_source: int = 0,
     gender_target: int = 0,
 ):
@@ -250,52 +271,88 @@ def swap_face(
         source_img = cv2.cvtColor(np.array(source_img), cv2.COLOR_RGB2BGR)
         target_img = cv2.cvtColor(np.array(target_img), cv2.COLOR_RGB2BGR)
 
-        source_face, wrong_gender = get_face_single(source_img, face_index=source_faces_index[0], gender_source=gender_source)
+        output: List = []
+        output_info: str = ""
+        swapped = 0
+
+        logger.info("Detecting Source Face, Index = %s", source_faces_index[0])        
+        source_face, wrong_gender, source_age, source_gender = get_face_single(source_img, face_index=source_faces_index[0], gender_source=gender_source)
+        if source_age != "None" or source_gender != "None":
+            logger.info("Detected: -%s- y.o. %s", source_age, source_gender)
+
+        output_info = f"SourceFaceIndex={source_faces_index[0]};Age={source_age};Gender={source_gender}\n"
+        output.append(output_info)
 
         if len(source_faces_index) != 0 and len(source_faces_index) != 1 and len(source_faces_index) != len(faces_index):
             logger.info("Source Faces must have no entries (default=0), one entry, or same number of entries as target faces.")
         elif source_face is not None:
-            
+         
             result = target_img
             face_swapper = getFaceSwapModel(model)
 
             source_face_idx = 0
 
-            swapped = 0
-
             for face_num in faces_index:
                 if len(source_faces_index) > 1 and source_face_idx > 0:
-                    source_face, wrong_gender = get_face_single(source_img, face_index=source_faces_index[source_face_idx], gender_source=gender_source)
+
+                    logger.info("Detecting Source Face, Index = %s", source_faces_index[source_face_idx])
+                    source_face, wrong_gender, source_age, source_gender = get_face_single(source_img, face_index=source_faces_index[source_face_idx], gender_source=gender_source)
+                    if source_age != "None" or source_gender != "None":
+                        logger.info("Detected: -%s- y.o. %s", source_age, source_gender)
+
+                    output_info = f"SourceFaceIndex={source_faces_index[source_face_idx]};Age={source_age};Gender={source_gender}\n"
+                    output.append(output_info)
+
                 source_face_idx += 1
 
                 if source_face is not None and wrong_gender == 0:
-                    target_face, wrong_gender = get_face_single(target_img, face_index=face_num, gender_target=gender_target)
+                    logger.info("Detecting Target Face, Index = %s", face_num)
+                    target_face, wrong_gender, target_age, target_gender = get_face_single(target_img, face_index=face_num, gender_target=gender_target)
+                    if target_age != "None" or target_gender != "None":
+                        logger.info("Detected: -%s- y.o. %s", target_age, target_gender)
+
+                    output_info = f"TargetFaceIndex={face_num};Age={target_age};Gender={target_gender}\n"
+                    output.append(output_info)
+                    
                     if target_face is not None and wrong_gender == 0:
+                        logger.info("Swapping Source into Target")
                         result = face_swapper.get(result, target_face, source_face)
                         swapped += 1
+                    
                     elif wrong_gender == 1:
                         wrong_gender = 0
+                        
                         if source_face_idx == len(source_faces_index):
                             result_image = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
-                            if upscale_options is not None:
-                                result_image = upscale_image(result_image, upscale_options)
-                            return result_image
+                            
+                            if enhancement_options is not None and len(source_faces_index) > 1:
+                                result_image = enhance_image(result_image, enhancement_options)
+                            
+                            return result_image, output, swapped
+                    
                     else:
                         logger.info(f"No target face found for {face_num}")
+                
                 elif wrong_gender == 1:
                     wrong_gender = 0
+                    
                     if source_face_idx == len(source_faces_index):
                         result_image = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
-                        if upscale_options is not None:
-                            result_image = upscale_image(result_image, upscale_options)
-                        return result_image
+                        
+                        if enhancement_options is not None and len(source_faces_index) > 1:
+                            result_image = enhance_image(result_image, enhancement_options)
+                        
+                        return result_image, output, swapped
+                
                 else:
                     logger.info(f"No source face found for face number {source_face_idx}.")
 
             result_image = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
-            if upscale_options is not None and swapped > 0:
-                result_image = upscale_image(result_image, upscale_options)
+            
+            if enhancement_options is not None and swapped > 0:
+                result_image = enhance_image(result_image, enhancement_options)
 
         else:
             logger.info("No source face(s) found")
-    return result_image
+    
+    return result_image, output, swapped

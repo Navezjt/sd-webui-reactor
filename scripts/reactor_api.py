@@ -14,7 +14,7 @@ from modules.api import api
 
 import gradio as gr
 
-from scripts.reactor_swapper import UpscaleOptions, swap_face
+from scripts.reactor_swapper import EnhancementOptions, swap_face
 from scripts.reactor_logger import logger
 
 
@@ -78,7 +78,7 @@ def reactor_api(_: gr.Blocks, app: FastAPI):
         gender_s = gender_source
         gender_t = gender_target
         restore_first_bool = True if restore_first == 1 else False
-        up_options = UpscaleOptions(do_restore_first=restore_first_bool, scale=scale, upscaler=get_upscaler(upscaler), upscale_visibility=upscale_visibility,face_restorer=get_face_restorer(face_restorer),restorer_visibility=restorer_visibility)
+        up_options = EnhancementOptions(do_restore_first=restore_first_bool, scale=scale, upscaler=get_upscaler(upscaler), upscale_visibility=upscale_visibility,face_restorer=get_face_restorer(face_restorer),restorer_visibility=restorer_visibility)
         use_model = get_full_model(model)
         if use_model is None:
             Exception("Model not found")

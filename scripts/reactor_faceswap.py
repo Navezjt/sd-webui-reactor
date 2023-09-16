@@ -17,10 +17,10 @@ from modules.paths_internal import models_path
 from modules.images import save_image
 
 from scripts.reactor_logger import logger
-from scripts.reactor_swapper import UpscaleOptions, swap_face, check_process_halt, reset_messaged
+from scripts.reactor_swapper import EnhancementOptions, swap_face, check_process_halt, reset_messaged
 from scripts.reactor_version import version_flag, app_title
 from scripts.console_log_patch import apply_logging_patch
-from scripts.reactor_helpers import make_grid
+from scripts.reactor_helpers import make_grid, get_image_path
 
 
 MODELS_PATH = None
@@ -51,7 +51,7 @@ class FaceSwapScript(scripts.Script):
         with gr.Accordion(f"{app_title}", open=False):
             with gr.Tab("Main"):
                 with gr.Column():
-                    img = gr.inputs.Image(type="pil")
+                    img = gr.Image(type="pil")
                     enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple FaceSwap Extension - {version_flag}")
                     save_original = gr.Checkbox(False, label="Save Original", info="Save the original image(s) made before swapping; If you use \"img2img\" - this option will affect with \"Swap in generated\" only")
                     gr.Markdown("<br>")
@@ -110,9 +110,11 @@ class FaceSwapScript(scripts.Script):
                     label="1. Restore Face -> 2. Upscale (-Uncheck- if you want vice versa)",
                     info="Postprocessing Order"
                 )
-                upscaler_name = gr.inputs.Dropdown(
+                upscaler_name = gr.Dropdown(
                     choices=[upscaler.name for upscaler in shared.sd_upscalers],
                     label="Upscaler",
+                    value="None",
+                    info="Won't scale if you choose -Swap in Source- via img2img, only 1x-postprocessing will affect (texturing, denoising, restyling etc.)"
                 )
                 gr.Markdown("<br>")
                 with gr.Row():
@@ -127,13 +129,13 @@ class FaceSwapScript(scripts.Script):
                         logger.warning(
                             "You should at least have one model in models directory, please read the doc here : https://github.com/Gourieff/sd-webui-reactor/"
                         )
-                        model = gr.inputs.Dropdown(
+                        model = gr.Dropdown(
                             choices=models,
                             label="Model not found, please download one and reload WebUI",
                         )
                     else:
-                        model = gr.inputs.Dropdown(
-                            choices=models, label="Model", default=models[0]
+                        model = gr.Dropdown(
+                            choices=models, label="Model", value=models[0]
                         )
                     console_logging_level = gr.Radio(
                         ["No log", "Minimum", "Default"],
@@ -178,8 +180,8 @@ class FaceSwapScript(scripts.Script):
         return None
 
     @property
-    def upscale_options(self) -> UpscaleOptions:
-        return UpscaleOptions(
+    def enhancement_options(self) -> EnhancementOptions:
+        return EnhancementOptions(
             do_restore_first = self.restore_first,
             scale=self.upscaler_scale,
             upscaler=self.upscaler,
@@ -253,17 +255,21 @@ class FaceSwapScript(scripts.Script):
                     for i in range(len(p.init_images)):
                         if len(p.init_images) > 1:
                             logger.info("Swap in %s", i)
-                        result = swap_face(
+                        result, output, swapped = swap_face(
                             self.source,
                             p.init_images[i],
                             source_faces_index=self.source_faces_index,
                             faces_index=self.faces_index,
                             model=self.model,
-                            upscale_options=self.upscale_options,
+                            enhancement_options=self.enhancement_options,
                             gender_source=self.gender_source,
                             gender_target=self.gender_target,
                         )
                         p.init_images[i] = result
+                        # result_path = get_image_path(p.init_images[i], p.outpath_samples, "", p.all_seeds[i], p.all_prompts[i], "txt", p=p, suffix="-swapped")
+                        # if len(output) != 0:
+                        #     with open(result_path, 'w', encoding="utf8") as f:
+                        #         f.writelines(output)
 
                         if shared.state.interrupted or shared.state.skipped:
                             return
@@ -286,6 +292,7 @@ class FaceSwapScript(scripts.Script):
                 orig_infotexts : List[str] = processed.infotexts[processed.index_of_first_image:]
 
                 result_images: List = processed.images
+                # result_info: List = processed.infotexts
 
                 if self.swap_in_generated:
                     logger.info("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
@@ -296,25 +303,31 @@ class FaceSwapScript(scripts.Script):
                                 break
                             if len(orig_images) > 1:
                                 logger.info("Swap in %s", i)
-                            result = swap_face(
+                            result, output, swapped = swap_face(
                                 self.source,
                                 img,
                                 source_faces_index=self.source_faces_index,
                                 faces_index=self.faces_index,
                                 model=self.model,
-                                upscale_options=self.upscale_options,
+                                enhancement_options=self.enhancement_options,
                                 gender_source=self.gender_source,
                                 gender_target=self.gender_target,
                             )
-                            if result is not None:
-                                suffix = "-swapped"
+                            if result is not None and swapped > 0:
                                 result_images.append(result)
+                                suffix = "-swapped"
                                 try:
-                                    save_image(result, p.outpath_samples, "", p.all_seeds[0], p.all_prompts[0], "png",info=info, p=p, suffix=suffix)
+                                    img_path = save_image(result, p.outpath_samples, "", p.all_seeds[0], p.all_prompts[0], "png",info=info, p=p, suffix=suffix)
                                 except:
                                     logger.error("Cannot save a result image - please, check SD WebUI Settings (Saving and Paths)")
-                            else:
+                            elif result is None:
                                 logger.error("Cannot create a result image")
+                            
+                            # if len(output) != 0:
+                            #     split_fullfn = os.path.splitext(img_path[0])
+                            #     fullfn = split_fullfn[0] + ".txt"
+                            #     with open(fullfn, 'w', encoding="utf8") as f:
+                            #         f.writelines(output)
                 
                 if shared.opts.return_grid and len(result_images) > 2 and postprocess_run:
                     grid = make_grid(result_images)
@@ -324,7 +337,8 @@ class FaceSwapScript(scripts.Script):
                     except:
                         logger.error("Cannot save a grid - please, check SD WebUI Settings (Saving and Paths)")
                 
-                processed.images = result_images   
+                processed.images = result_images
+                # processed.infotexts = result_info
     
     def postprocess_batch(self, p, *args, **kwargs):
         if self.enable and not self.save_original:
@@ -343,13 +357,13 @@ class FaceSwapScript(scripts.Script):
             if self.source is not None:
                 logger.info("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
                 image: Image.Image = script_pp.image
-                result = swap_face(
+                result, output, swapped = swap_face(
                     self.source,
                     image,
                     source_faces_index=self.source_faces_index,
                     faces_index=self.faces_index,
                     model=self.model,
-                    upscale_options=self.upscale_options,
+                    enhancement_options=self.enhancement_options,
                     gender_source=self.gender_source,
                     gender_target=self.gender_target,
                 )
@@ -358,5 +372,11 @@ class FaceSwapScript(scripts.Script):
                     pp.info = {}
                     p.extra_generation_params.update(pp.info)
                     script_pp.image = pp.image
+
+                    # if len(output) != 0:
+                    #     result_path = get_image_path(script_pp.image, p.outpath_samples, "", p.all_seeds[0], p.all_prompts[0], "txt", p=p, suffix="-swapped")
+                    #     if len(output) != 0:
+                    #         with open(result_path, 'w', encoding="utf8") as f:
+                    #             f.writelines(output)
                 except:
                     logger.error("Cannot create a result image")
