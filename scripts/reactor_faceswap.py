@@ -246,6 +246,8 @@ class FaceSwapScript(scripts.Script):
                 self.source_faces_index = [0]
             if len(self.faces_index) == 0:
                 self.faces_index = [0]
+            if self.save_original is None:
+                self.save_original = False
 
             if self.source is not None:
                 apply_logging_patch(console_logging_level)
