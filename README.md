@@ -114,6 +114,23 @@
 
 <img src="example/example.jpg" alt="example" width="808"/>
 
+### Face Indexes
+
+ReActor detects faces in images in the following order:<br>
+left->right, top->bottom
+
+And if you need to specify faces, you can set indexes for source and input images.
+
+Index of the first detected face is 0.
+
+You can set indexes in the order you need.<br>
+E.g.: 0,1,2 (for Source); 1,0,2 (for Input).<br>
+This means: the second Input face (index = 1) will be swapped by the first Source face (index = 0) and so on.
+
+### Genders
+
+You can specify the gender to detect in images.<br>
+ReActor will swap a face only if it meets the given condition.
 
 ### The result face is blurry
 Use the "Restore Face" option. You can also try the "Upscaler" option or for more finer control, use an upscaler from the "Extras" tab.
@@ -136,6 +153,18 @@ Select the face numbers you wish to swap using the "Comma separated face number(
 You can choose to activate the swap on the source image or on the generated image, or on both using the checkboxes. Activating on source image allows you to start from a given base and apply the diffusion process to it.
 
 ReActor works with Inpainting - but only the masked part will be swapped.<br>Please use with the "Only masked" option for "Inpaint area" if you enabled "Upscaler". Otherwise use the upscale option via the Extras tab or via the Script loader (below the screen) with "SD upscale" or "Ultimate SD upscale".
+
+### ReActor + FaceSwapLab inside one enclosure
+
+If you have troubles running both extensions together, try the following:
+
+1. Delete FaceSwapLab from the extensions folder
+2. Delete `onnxruntime` and `onnxruntime-gpu` folders from the site-packages directory (inside VENV Lib)
+3. Run SD WebUI and let ReActor to install `onnxruntime`, close SD WebUI
+4. `git clone https://github.com/glucauze/sd-webui-faceswaplab` into the SD WebUI extensions folder
+5. Edit `sd-webui-faceswaplab/install.py` file:
+    - Line 9: `use_gpu = True` -> `use_gpu = False`
+6. Run SD WebUI, both extensions must work fine after that
 
 ## API
 
@@ -165,9 +194,9 @@ Please, check the path where "inswapper_128.onnx" model is stored. It must be in
 6. Update your pip at first: `pip install -U pip`
 7. Then one-by-one:
    - `pip install insightface==0.7.3`
-   - `pip install onnx==1.14.0`
-   - `pip install onnxruntime==1.15.0`
-   - `pip install opencv-python==4.7.0.72`
+   - `pip install onnx`
+   - `pip install onnxruntime`
+   - `pip install opencv-python`
    - `pip install tqdm`
 8. Type `deactivate`, you can close your Terminal or Console and start your SD WebUI, ReActor should start OK - if not, welcome to the Issues section.
 
@@ -186,24 +215,24 @@ Alternative solutions:
 
 You need to disable the "SD-CN-Animation" extension (or perhaps some another that causes the conflict)
 
-### **V. "INVALID_PROTOBUF : Load model from <...>\models\insightface\inswapper_128.onnx failed:Protobuf parsing failed" OR "AttributeError: 'NoneType' object has no attribute 'get'"**
+### **V. "INVALID_PROTOBUF : Load model from <...>\models\insightface\inswapper_128.onnx failed:Protobuf parsing failed" OR "AttributeError: 'NoneType' object has no attribute 'get'" OR "AttributeError: 'FaceSwapScript' object has no attribute 'save_original'"**
 
 This error may occur if there's smth wrong with the model file `inswapper_128.onnx`
 
 Try to download it manually from [here](https://github.com/facefusion/facefusion-assets/releases/download/models/inswapper_128.onnx)
 and put it to the `stable-diffusion-webui\models\insightface` replacing existing one
 
-### **VI. "ValueError: This ORT build has ['TensorrtExecutionProvider', 'CUDAExecutionProvider', 'CPUExecutionProvider'] enabled"**
+### **VI. "ValueError: This ORT build has ['TensorrtExecutionProvider', 'CUDAExecutionProvider', 'CPUExecutionProvider'] enabled" OR "ValueError: This ORT build has ['AzureExecutionProvider', 'CPUExecutionProvider'] enabled"**
 
 1. Close (stop) your SD WebUI Server if it's running
 2. Go to the (Windows)`venv\Lib\site-packages` or (MacOS/Linux)`venv/lib/python3.10/site-packages` and see if there are any folders with names start from "~" (for example "~rotobuf"), delete them
 3. Go to the (Windows)`venv\Scripts` or (MacOS/Linux)`venv/bin` run Terminal or Console (cmd) there and type `activate`
 4. Then:
 - `python -m pip install -U pip`
-- `pip uninstall -y onnx onnxruntime onnxruntime-gpu onnxruntime-silicon`
-- `pip install onnx==1.14.0 onnxruntime==1.15.0`
+- `pip uninstall -y onnx onnxruntime onnxruntime-gpu onnxruntime-silicon onnxruntime-extensions`
+- `pip install onnx==1.14.1 onnxruntime==1.15.1`
 
-If it didn't help - it seems that you have another extension reinstalling `onnxruntime` when SD WebUI checks requirements. Please see your extensions list. If you find there "WD14 tagger" - try to disable it and then follow the steps above once again. This extension causes reinstalling of `onnxruntime` to `onnxruntime-gpu` every time SD WebUI runs.
+If it didn't help - it seems that you have another extension reinstalling `onnxruntime` when SD WebUI checks requirements. Please see your extensions list. If you find there "WD14 tagger" - try to disable it and then follow the steps above once again. This extension causes reinstalling of `onnxruntime` to `onnxruntime-gpu` or `onnxruntime-extensions` every time SD WebUI runs.
 
 ### **VII. "ImportError: cannot import name 'builder' from 'google.protobuf.internal'"**
 
