@@ -27,9 +27,9 @@
 
 <table>
   <tr>
-    <td width="144px">
+    <td width="134px">
       <a href="https://boosty.to/artgourieff" target="_blank">
-        <img src="https://lovemet.ru/www/boosty.jpg" width="108" alt="Support Me on Boosty"/>
+        <img src="https://lovemet.ru/www/boosty.jpg" width="108" alt="Поддержать проект на Boosty"/>
         <br>
         <sup>
           Поддержать проект
@@ -38,6 +38,15 @@
     </td>
     <td>
       ReActor это расширение для Stable Diffusion WebUI, которое позволяет делать простую и точную замену лиц на изображениях. Сделано на основе <a href="https://github.com/Gourieff/ReActor-UI" target="_blank">ReActor-UI</a>.
+    </td>
+    <td width="134px">
+      <a href="https://paypal.me/artgourieff" target="_blank">
+        <img src="https://www.paypalobjects.com/digitalassets/c/website/logo/full-text/pp_fc_hl.svg" width="108" alt="Поддержать проект через PayPal"/>
+        <br>
+        <sup>
+          Помочь проекту
+        </sup>
+      </a>
     </td>
   </tr>
 </table>
