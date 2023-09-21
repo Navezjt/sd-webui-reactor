@@ -39,7 +39,7 @@
     <td>
       ReActor это расширение для Stable Diffusion WebUI, которое позволяет делать простую и точную замену лиц на изображениях. Сделано на основе <a href="https://github.com/Gourieff/ReActor-UI" target="_blank">ReActor-UI</a>.
     </td>
-    <td width="134px">
+    <td width="144px">
       <a href="https://paypal.me/artgourieff" target="_blank">
         <img src="https://www.paypalobjects.com/digitalassets/c/website/logo/full-text/pp_fc_hl.svg" width="108" alt="Поддержать проект через PayPal"/>
         <br>

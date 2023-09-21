@@ -43,7 +43,7 @@
     <td>
       ReActor is an extension for Stable Diffusion WebUI that allows a very easy and accurate face-replacement (face swap) in images. Based on <a href="https://github.com/Gourieff/ReActor-UI" target="_blank">ReActor-UI</a>.
     </td>
-    <td width="134px">
+    <td width="144px">
       <a href="https://paypal.me/artgourieff" target="_blank">
         <img src="https://www.paypalobjects.com/digitalassets/c/website/logo/full-text/pp_fc_hl.svg" width="108" alt="Support Me via PayPal"/>
         <br>
