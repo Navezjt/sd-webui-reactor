@@ -2,7 +2,36 @@
 
   <img src="example/ReActor_logo_red.png" alt="logo" width="180px"/>
     
-  ![Version](https://img.shields.io/badge/версия-0.4.2_beta2-green?style=for-the-badge&labelColor=darkgreen)<hr>
+  ![Version](https://img.shields.io/badge/версия-0.4.2_beta2-green?style=for-the-badge&labelColor=darkgreen)
+  
+  <table>
+    <tr style="border:2px solid transparent">
+      <td width="50%" style="text-align:right">
+        <b>
+          для любых GPU
+        </b>
+        <br>
+        <sup>
+          NVIDIA / AMD / Intel
+        </sup>
+        </a>
+      </td>
+      <td>
+        <a href="https://github.com/Gourieff/sd-webui-reactor-force" target="_blank">
+          для GPU NVIDIA
+          <br>
+          <span style="display:inline-block">
+            <sup>
+              8Гб VRAM или более
+            </sup>
+          </span>
+        </a>
+      </td>
+    </tr>
+  </table>
+  
+  <hr>
+  
   [![Commit activity](https://img.shields.io/github/commit-activity/t/Gourieff/sd-webui-reactor/main?cacheSeconds=0)](https://github.com/Gourieff/sd-webui-reactor/commits/main)
   ![Last commit](https://img.shields.io/github/last-commit/Gourieff/sd-webui-reactor/main?cacheSeconds=0)
   [![Opened issues](https://img.shields.io/github/issues/Gourieff/sd-webui-reactor?color=red)](https://github.com/Gourieff/sd-webui-reactor/issues?cacheSeconds=0)
@@ -256,9 +285,9 @@ Inpainting также работает, но замена лица происх�
 5. Затем:
 - `python -m pip install -U pip`
 - `pip uninstall protobuf`
-- `pip install protobuf==3.20.3`
+- `pip install protobuf>=3.20.3`
 
-Если это не помгло - значит, есть к-л другое расширение, которое использует более новую версию пакета protobuf, и SD WebUI устанавливает эту версию при каждом запуске.
+Если это не помгло - значит, есть к-л другое расширение, которое использует неподходящую версию пакета protobuf, и SD WebUI устанавливает эту версию при каждом запуске.
 
 <a name="insightfacebuild">
 

@@ -2,7 +2,36 @@
 
   <img src="example/ReActor_logo_red.png" alt="logo" width="180px"/>
     
-  ![Version](https://img.shields.io/badge/version-0.4.2_beta2-green?style=for-the-badge&labelColor=darkgreen)<hr>
+  ![Version](https://img.shields.io/badge/version-0.4.2_beta2-green?style=for-the-badge&labelColor=darkgreen)
+  
+  <table>
+    <tr style="border:2px solid transparent">
+      <td width="50%" style="text-align:right">
+        <b>
+          for Any GPU
+        </b>
+        <br>
+        <sup>
+          NVIDIA / AMD / Intel
+        </sup>
+        </a>
+      </td>
+      <td>
+        <a href="https://github.com/Gourieff/sd-webui-reactor-force" target="_blank">
+          for NVIDIA GPU
+          <br>
+          <span style="display:inline-block">
+            <sup>
+              8Gb VRAM or more
+            </sup>
+          </span>
+        </a>
+      </td>
+    </tr>
+  </table>
+  
+  <hr>
+  
   [![Commit activity](https://img.shields.io/github/commit-activity/t/Gourieff/sd-webui-reactor/main?cacheSeconds=0)](https://github.com/Gourieff/sd-webui-reactor/commits/main)
   ![Last commit](https://img.shields.io/github/last-commit/Gourieff/sd-webui-reactor/main?cacheSeconds=0)
   [![Opened issues](https://img.shields.io/github/issues/Gourieff/sd-webui-reactor?color=red)](https://github.com/Gourieff/sd-webui-reactor/issues?cacheSeconds=0)
@@ -252,9 +281,9 @@ If it didn't help - it seems that you have another extension reinstalling `onnxr
 5. Then:
 - `python -m pip install -U pip`
 - `pip uninstall protobuf`
-- `pip install protobuf==3.20.3`
+- `pip install protobuf>=3.20.3`
 
-If this method doesn't help - there is some other extension that has a higher version of protobuf dependence and SD WebUI installs it on a startup requirements check
+If this method doesn't help - there is some other extension that has a wrong version of protobuf dependence and SD WebUI installs it on a startup requirements check
 
 <a name="insightfacebuild">
 
