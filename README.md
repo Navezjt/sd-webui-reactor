@@ -5,8 +5,8 @@
   ![Version](https://img.shields.io/badge/version-0.4.2_beta2-green?style=for-the-badge&labelColor=darkgreen)
   
   <table>
-    <tr style="border:2px solid transparent">
-      <td width="50%" style="text-align:right">
+    <tr>
+      <td width="50%">
         <b>
           for Any GPU
         </b>
@@ -16,15 +16,13 @@
         </sup>
         </a>
       </td>
-      <td>
+      <td width="144px">
         <a href="https://github.com/Gourieff/sd-webui-reactor-force" target="_blank">
           for NVIDIA GPU
           <br>
-          <span style="display:inline-block">
-            <sup>
-              8Gb VRAM or more
-            </sup>
-          </span>
+          <sup>
+            8Gb VRAM or more
+          </sup>
         </a>
       </td>
     </tr>
