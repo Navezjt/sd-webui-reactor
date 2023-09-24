@@ -193,6 +193,10 @@ ReActor works with Inpainting - but only the masked part will be swapped.<br>Ple
 
 If you have troubles running both extensions together, try the following:
 
+**for NVIDIA GPU with VRAM > 6Gb:**
+<br>&nbsp;&nbsp;&nbsp; Just use [ReActor Force](https://github.com/Gourieff/sd-webui-reactor-force)
+
+**for any other GPU**:
 1. Delete FaceSwapLab from the extensions folder
 2. Delete `onnxruntime` and `onnxruntime-gpu` folders from the site-packages directory (inside VENV Lib)
 3. Run SD WebUI and let ReActor to install `onnxruntime`, close SD WebUI
