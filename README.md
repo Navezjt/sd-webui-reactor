@@ -14,7 +14,6 @@
         <sup>
           NVIDIA / AMD / Intel
         </sup>
-        </a>
       </td>
       <td width="144px">
         <a href="https://github.com/Gourieff/sd-webui-reactor-force" target="_blank">
