@@ -17,8 +17,20 @@ req_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "requiremen
 
 models_dir_old = os.path.join(models_path, "roop")
 models_dir = os.path.join(models_path, "insightface")
+
+# Check the deprecated 'roop' folder
 if os.path.exists(models_dir_old):
-    os.rename(models_dir_old, models_dir)
+    if not os.listdir(models_dir_old) and (not os.listdir(models_dir) or not os.path.exists(models_dir)):
+        os.rename(models_dir_old, models_dir)
+    else:
+        import shutil
+        for file in os.listdir(models_dir_old):
+            shutil.move(os.path.join(models_dir_old, file), models_dir)
+        try:
+            os.rmdir(models_dir_old)
+        except Exception as e:
+            print(f"OSError: {e}")
+            
 model_url = "https://github.com/facefusion/facefusion-assets/releases/download/models/inswapper_128.onnx"
 model_name = os.path.basename(model_url)
 model_path = os.path.join(models_dir, model_name)
