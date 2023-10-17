@@ -25,7 +25,7 @@ if os.path.exists(models_dir_old):
     else:
         import shutil
         for file in os.listdir(models_dir_old):
-            shutil.move(os.path.join(models_dir_old, file), models_dir)
+            shutil.move(os.path.join(models_dir_old, file), os.path.join(models_dir, file))
         try:
             os.rmdir(models_dir_old)
         except Exception as e:
