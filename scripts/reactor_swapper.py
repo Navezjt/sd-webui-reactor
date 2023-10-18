@@ -10,7 +10,10 @@ from PIL import Image
 import insightface
 
 from modules.face_restoration import FaceRestoration
-from modules import codeformer_model
+try: # A1111
+    from modules import codeformer_model
+except: # SD.Next
+    from modules.postprocess import codeformer_model
 from modules.upscaler import UpscalerData
 from modules.shared import state
 from scripts.reactor_logger import logger
