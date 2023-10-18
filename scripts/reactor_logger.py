@@ -31,7 +31,7 @@ logger = logging.getLogger("ReActor")
 logger.propagate = False
 
 # Add Custom Level
-addLoggingLevel("STATUS", logging.INFO - 5)
+addLoggingLevel("STATUS", logging.INFO + 5)
 
 # Add handler if we don't have one.
 if not logger.handlers:
