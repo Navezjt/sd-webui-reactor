@@ -40,6 +40,8 @@ args=[
     0, #15 Gender Detection (Target) (0 - No, 1 - Female Only, 2 - Male Only)
     False, #16 Save the original image(s) made before swapping
     0.8, #17 CodeFormer Weight (0 = maximum effect, 1 = minimum effect), 0.5 - by default
+    False, #18 Source Image Hash Check, True - by default
+    False, #19 Target Image Hash Check, False - by default
 ]
 
 # The args for ReActor can be found by 

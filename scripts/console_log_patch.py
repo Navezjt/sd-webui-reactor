@@ -117,4 +117,4 @@ def apply_logging_patch(console_logging_level):
         logger.setLevel(logging.STATUS)
     elif console_logging_level == 2:
         patch_insightface(*original_functions)
-        logger.setLevel(logging.STATUS)
+        logger.setLevel(logging.INFO)

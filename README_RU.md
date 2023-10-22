@@ -2,7 +2,7 @@
 
   <img src="example/ReActor_logo_red.png" alt="logo" width="180px"/>
     
-  ![Version](https://img.shields.io/badge/версия-0.4.3_beta3-green?style=for-the-badge&labelColor=darkgreen)
+  ![Version](https://img.shields.io/badge/версия-0.4.3_beta4-green?style=for-the-badge&labelColor=darkgreen)
   
   <table>
     <tr>

@@ -42,8 +42,8 @@ if not logger.handlers:
     logger.addHandler(handler)
 
 # Configure logger
-loglevel_string = getattr(shared.cmd_opts, "reactor_loglevel", "STATUS")
-loglevel = getattr(logging, loglevel_string.upper(), "status")
+loglevel_string = getattr(shared.cmd_opts, "reactor_loglevel", "INFO")
+loglevel = getattr(logging, loglevel_string.upper(), "info")
 logger.setLevel(loglevel)
 
 def set_Run(value):

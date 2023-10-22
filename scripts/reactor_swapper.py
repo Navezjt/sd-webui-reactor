@@ -9,6 +9,7 @@ from PIL import Image
 
 import insightface
 
+from scripts.reactor_helpers import get_image_md5hash
 from modules.face_restoration import FaceRestoration
 try: # A1111
     from modules import codeformer_model
@@ -74,6 +75,10 @@ CURRENT_FS_MODEL_PATH = None
 
 ANALYSIS_MODEL = None
 
+SOURCE_FACES = None
+SOURCE_IMAGE_HASH = None
+TARGET_FACES = None
+TARGET_IMAGE_HASH = None
 
 def getAnalysisModel():
     global ANALYSIS_MODEL
@@ -271,7 +276,10 @@ def swap_face(
     enhancement_options: Union[EnhancementOptions, None] = None,
     gender_source: int = 0,
     gender_target: int = 0,
+    source_hash_check: bool = True,
+    target_hash_check: bool = False,
 ):
+    global SOURCE_FACES, SOURCE_IMAGE_HASH, TARGET_FACES, TARGET_IMAGE_HASH
     result_image = target_img
     
     if check_process_halt():
@@ -291,21 +299,69 @@ def swap_face(
                 img_bytes = base64.b64decode(source_img)
             
             source_img = Image.open(io.BytesIO(img_bytes))
-            
+
         source_img = cv2.cvtColor(np.array(source_img), cv2.COLOR_RGB2BGR)
         target_img = cv2.cvtColor(np.array(target_img), cv2.COLOR_RGB2BGR)
 
         output: List = []
         output_info: str = ""
         swapped = 0
+        
+        if source_hash_check:
 
-        logger.status("Analyzing Source Image...")
-        source_faces = analyze_faces(source_img)
+            source_image_md5hash = get_image_md5hash(source_img)
+
+            if SOURCE_IMAGE_HASH is None:
+                SOURCE_IMAGE_HASH = source_image_md5hash
+                source_image_same = False
+            else:
+                source_image_same = True if SOURCE_IMAGE_HASH == source_image_md5hash else False
+                if not source_image_same:
+                    SOURCE_IMAGE_HASH = source_image_md5hash
+
+            logger.info("Source Image MD5 Hash = %s", SOURCE_IMAGE_HASH)
+            logger.info("Source Image the Same? %s", source_image_same)
+
+            if SOURCE_FACES is None or not source_image_same:
+                logger.status("Analyzing Source Image...")
+                source_faces = analyze_faces(source_img)
+                SOURCE_FACES = source_faces
+            elif source_image_same:
+                logger.status("Using Ready Source Face(s) Model...")
+                source_faces = SOURCE_FACES
+
+        else:
+            logger.status("Analyzing Source Image...")
+            source_faces = analyze_faces(source_img)
 
         if source_faces is not None:
 
-            logger.status("Analyzing Target Image...")
-            target_faces = analyze_faces(target_img)
+            if target_hash_check:
+            
+                target_image_md5hash = get_image_md5hash(target_img)
+
+                if TARGET_IMAGE_HASH is None:
+                    TARGET_IMAGE_HASH = target_image_md5hash
+                    target_image_same = False
+                else:
+                    target_image_same = True if TARGET_IMAGE_HASH == target_image_md5hash else False
+                    if not target_image_same:
+                        TARGET_IMAGE_HASH = target_image_md5hash
+
+                logger.info("Target Image MD5 Hash = %s", TARGET_IMAGE_HASH)
+                logger.info("Target Image the Same? %s", target_image_same)
+                
+                if TARGET_FACES is None or not target_image_same:
+                    logger.status("Analyzing Target Image...")
+                    target_faces = analyze_faces(target_img)
+                    TARGET_FACES = target_faces
+                elif target_image_same:
+                    logger.status("Using Ready Target Face(s) Model...")
+                    target_faces = TARGET_FACES
+            
+            else:
+                logger.status("Analyzing Target Image...")
+                target_faces = analyze_faces(target_img)
 
             logger.status("Detecting Source Face, Index = %s", source_faces_index[0])
             source_face, wrong_gender, source_age, source_gender = get_face_single(source_img, source_faces, face_index=source_faces_index[0], gender_source=gender_source)

@@ -4,6 +4,7 @@ from PIL import Image
 from math import isqrt, ceil
 from typing import List
 import logging
+import hashlib
 
 from modules.images import FilenameGenerator, get_next_sequence_number
 from modules import shared, script_callbacks
@@ -117,3 +118,7 @@ def addLoggingLevel(levelName, levelNum, methodName=None):
     setattr(logging, levelName, levelNum)
     setattr(logging.getLoggerClass(), methodName, logForLevel)
     setattr(logging, methodName, logToRoot)
+
+def get_image_md5hash(image: Image.Image):
+    md5hash = hashlib.md5(image.tobytes())
+    return md5hash.hexdigest()

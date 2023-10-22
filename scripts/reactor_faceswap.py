@@ -153,6 +153,18 @@ class FaceSwapScript(scripts.Script):
                         label="Console Log Level",
                         type="index",
                     )
+                gr.Markdown("<br>")
+                with gr.Row():
+                    source_hash_check = gr.Checkbox(
+                        True,
+                        label="Source Image Hash Check",
+                        info="Recommended to keep it ON. Processing is faster when Source Image is the same."
+                    )
+                    target_hash_check = gr.Checkbox(
+                        False,
+                        label="Target Image Hash Check",
+                        info="Affects if you use img2img with only 'Swap in source image' option."
+                    )
 
         return [
             img,
@@ -173,6 +185,8 @@ class FaceSwapScript(scripts.Script):
             gender_target,
             save_original,
             codeformer_weight,
+            source_hash_check,
+            target_hash_check,
         ]
 
 
@@ -223,6 +237,8 @@ class FaceSwapScript(scripts.Script):
         gender_target,
         save_original,
         codeformer_weight,
+        source_hash_check,
+        target_hash_check,
     ):
         self.enable = enable
         if self.enable:
@@ -246,6 +262,8 @@ class FaceSwapScript(scripts.Script):
             self.gender_target = gender_target
             self.save_original = save_original
             self.codeformer_weight = codeformer_weight
+            self.source_hash_check = source_hash_check
+            self.target_hash_check = target_hash_check
             if self.gender_source is None or self.gender_source == "No":
                 self.gender_source = 0
             if self.gender_target is None or self.gender_target == "No":
@@ -262,6 +280,10 @@ class FaceSwapScript(scripts.Script):
                 self.faces_index = [0]
             if self.save_original is None:
                 self.save_original = False
+            if self.source_hash_check is None:
+                self.source_hash_check = True
+            if self.target_hash_check is None:
+                self.target_hash_check = False
 
             if self.source is not None:
                 apply_logging_patch(console_logging_level)
@@ -280,6 +302,8 @@ class FaceSwapScript(scripts.Script):
                             enhancement_options=self.enhancement_options,
                             gender_source=self.gender_source,
                             gender_target=self.gender_target,
+                            source_hash_check=self.source_hash_check,
+                            target_hash_check=self.target_hash_check,
                         )
                         p.init_images[i] = result
                         # result_path = get_image_path(p.init_images[i], p.outpath_samples, "", p.all_seeds[i], p.all_prompts[i], "txt", p=p, suffix="-swapped")
@@ -328,6 +352,8 @@ class FaceSwapScript(scripts.Script):
                                 enhancement_options=self.enhancement_options,
                                 gender_source=self.gender_source,
                                 gender_target=self.gender_target,
+                                source_hash_check=self.source_hash_check,
+                                target_hash_check=self.target_hash_check,
                             )
                             if result is not None and swapped > 0:
                                 result_images.append(result)
@@ -382,6 +408,8 @@ class FaceSwapScript(scripts.Script):
                     enhancement_options=self.enhancement_options,
                     gender_source=self.gender_source,
                     gender_target=self.gender_target,
+                    source_hash_check=self.source_hash_check,
+                    target_hash_check=self.target_hash_check,
                 )
                 try:
                     pp = scripts_postprocessing.PostprocessedImage(result)
