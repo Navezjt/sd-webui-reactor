@@ -2,7 +2,7 @@
 
   <img src="example/ReActor_logo_red.png" alt="logo" width="180px"/>
     
-  ![Version](https://img.shields.io/badge/версия-0.4.3_beta4-green?style=for-the-badge&labelColor=darkgreen)
+  ![Version](https://img.shields.io/badge/версия-0.4.3-brightgreen?style=for-the-badge&labelColor=darkgreen)
   
   <table>
     <tr>
@@ -26,6 +26,8 @@
       </td>
     </tr>
   </table>
+
+  <a href='https://ko-fi.com/gourieff' target='_blank'><img height='33' src='https://storage.ko-fi.com/cdn/kofi3.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
   
   <hr>
   
@@ -239,7 +241,7 @@ Inpainting также работает, но замена лица происх�
 7. Далее:
    - `pip install insightface==0.7.3`
    - `pip install onnx`
-   - `pip install onnxruntime==1.15.1`
+   - `pip install onnxruntime`
    - `pip install opencv-python`
    - `pip install tqdm`
 8. Выполните `deactivate`, закройте Терминал или Консоль и запустите SD WebUI, ReActor должен запуститься без к-л проблем - если же нет, добро пожаловать в раздел "Issues".
@@ -274,7 +276,7 @@ Inpainting также работает, но замена лица происх�
 4. Затем:
 - `python -m pip install -U pip`
 - `pip uninstall -y onnx onnxruntime onnxruntime-gpu onnxruntime-silicon onnxruntime-extensions`
-- `pip install onnx==1.14.1 onnxruntime==1.15.1`
+- `pip install onnx==1.14.1 onnxruntime`
 
 Если это не помогло - значит какое-то другое расширение переустанавливает `onnxruntime` всякий раз, когда SD WebUI проверяет требования пакетов. Внимательно посмотрите список активных расширений. Если видите там "WD14 tagger" - попробуйте отключить его и ещё раз выполнить шаги выше. Это расширение вызывает переустановку `onnxruntime` на `onnxruntime-gpu` или `onnxruntime==1.16.0` при каждом запуске SD WebUI.<br>ORT 1.16.0 выкатили с ошибкой https://github.com/microsoft/onnxruntime/issues/17631 - не устанавливайте её!
 

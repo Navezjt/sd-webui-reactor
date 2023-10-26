@@ -2,7 +2,7 @@
 
   <img src="example/ReActor_logo_red.png" alt="logo" width="180px"/>
     
-  ![Version](https://img.shields.io/badge/version-0.4.3_beta4-green?style=for-the-badge&labelColor=darkgreen)
+  ![Version](https://img.shields.io/badge/version-0.4.3-brightgreen?style=for-the-badge&labelColor=darkgreen)
   
   <table>
     <tr>
@@ -26,6 +26,8 @@
       </td>
     </tr>
   </table>
+
+  <a href='https://ko-fi.com/gourieff' target='_blank'><img height='33' src='https://storage.ko-fi.com/cdn/kofi3.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
   
   <hr>
   
@@ -234,7 +236,7 @@ Please, check the path where "inswapper_128.onnx" model is stored. It must be in
 7. Then one-by-one:
    - `pip install insightface==0.7.3`
    - `pip install onnx`
-   - `pip install onnxruntime==1.15.1`
+   - `pip install onnxruntime`
    - `pip install opencv-python`
    - `pip install tqdm`
 8. Type `deactivate`, you can close your Terminal or Console and start your SD WebUI, ReActor should start OK - if not, welcome to the Issues section.
@@ -269,7 +271,7 @@ and put it to the `stable-diffusion-webui\models\insightface` replacing existing
 4. Then:
 - `python -m pip install -U pip`
 - `pip uninstall -y onnx onnxruntime onnxruntime-gpu onnxruntime-silicon onnxruntime-extensions`
-- `pip install onnx==1.14.1 onnxruntime==1.15.1`
+- `pip install onnx==1.14.1 onnxruntime`
 
 If it didn't help - it seems that you have another extension reinstalling `onnxruntime` when SD WebUI checks requirements. Please see your extensions list. If you find there "WD14 tagger" - try to disable it and then follow the steps above once again. This extension causes reinstalling of `onnxruntime` to `onnxruntime-gpu` or `onnxruntime==1.16.0` every time SD WebUI runs.<br>ORT 1.16.0 has a bug https://github.com/microsoft/onnxruntime/issues/17631 - don't install it!
 
