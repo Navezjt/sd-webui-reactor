@@ -313,6 +313,9 @@ OR
 
 Just delete the folder `sd-webui-reactor` inside the `extensions` directory and then run Terminal or Console (cmd) and type `git clone https://github.com/Gourieff/sd-webui-reactor`
 
+### **X. StabilityMatrix Issues**
+
+If you encounter any issues with installing this extension in the StabilityMatrix package manager - read here how to solve: https://github.com/Gourieff/sd-webui-reactor/issues/129#issuecomment-1768210875
 
 ## Updating
 
