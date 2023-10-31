@@ -424,3 +424,226 @@ class FaceSwapScript(scripts.Script):
                     #             f.writelines(output)
                 except:
                     logger.error("Cannot create a result image")
+
+
+class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
+    name = 'ReActor'
+    order = 20000
+
+    def ui(self):
+        with gr.Accordion(f"{app_title}", open=False):
+            with gr.Tab("Main"):
+                with gr.Column():
+                    img = gr.Image(type="pil")
+                    enable = gr.Checkbox(False, label="Enable", info=f"The Fast and Simple FaceSwap Extension - {version_flag}")
+                    gr.Markdown("<br>")
+                    gr.Markdown("Source Image (above):")
+                    with gr.Row():
+                        source_faces_index = gr.Textbox(
+                            value="0",
+                            placeholder="Which face(s) to use as Source (comma separated)",
+                            label="Comma separated face number(s); Example: 0,2,1",
+                        )
+                        gender_source = gr.Radio(
+                            ["No", "Female Only", "Male Only"],
+                            value="No",
+                            label="Gender Detection (Source)",
+                            type="index",
+                        )
+                    gr.Markdown("<br>")
+                    gr.Markdown("Target Image (result):")
+                    with gr.Row():
+                        faces_index = gr.Textbox(
+                            value="0",
+                            placeholder="Which face(s) to Swap into Target (comma separated)",
+                            label="Comma separated face number(s); Example: 1,0,2",
+                        )
+                        gender_target = gr.Radio(
+                            ["No", "Female Only", "Male Only"],
+                            value="No",
+                            label="Gender Detection (Target)",
+                            type="index",
+                        )
+                    gr.Markdown("<br>")
+                    with gr.Row():
+                        face_restorer_name = gr.Radio(
+                            label="Restore Face",
+                            choices=["None"] + [x.name() for x in shared.face_restorers],
+                            value=shared.face_restorers[0].name(),
+                            type="value",
+                        )
+                        with gr.Column():
+                            face_restorer_visibility = gr.Slider(
+                                0, 1, 1, step=0.1, label="Restore Face Visibility"
+                            )
+                            codeformer_weight = gr.Slider(
+                                0, 1, 0.5, step=0.1, label="CodeFormer Weight", info="0 = maximum effect, 1 = minimum effect"
+                            )
+                    gr.Markdown("<br>")
+
+            with gr.Tab("Upscale"):
+                restore_first = gr.Checkbox(
+                    True,
+                    label="1. Restore Face -> 2. Upscale (-Uncheck- if you want vice versa)",
+                    info="Postprocessing Order"
+                )
+                upscaler_name = gr.Dropdown(
+                    choices=[upscaler.name for upscaler in shared.sd_upscalers],
+                    label="Upscaler",
+                    value="None",
+                    info="Won't scale if you choose -Swap in Source- via img2img, only 1x-postprocessing will affect (texturing, denoising, restyling etc.)"
+                )
+                gr.Markdown("<br>")
+                with gr.Row():
+                    upscaler_scale = gr.Slider(1, 8, 1, step=0.1, label="Scale by")
+                    upscaler_visibility = gr.Slider(
+                        0, 1, 1, step=0.1, label="Upscaler Visibility (if scale = 1)"
+                    )
+            with gr.Tab("Settings"):
+                models = get_models()
+                with gr.Row():
+                    if len(models) == 0:
+                        logger.warning(
+                            "You should at least have one model in models directory, please read the doc here : https://github.com/Gourieff/sd-webui-reactor/"
+                        )
+                        model = gr.Dropdown(
+                            choices=models,
+                            label="Model not found, please download one and reload WebUI",
+                        )
+                    else:
+                        model = gr.Dropdown(
+                            choices=models, label="Model", value=models[0]
+                        )
+                    console_logging_level = gr.Radio(
+                        ["No log", "Minimum", "Default"],
+                        value="Minimum",
+                        label="Console Log Level",
+                        type="index",
+                    )
+                gr.Markdown("<br>")
+                with gr.Row():
+                    source_hash_check = gr.Checkbox(
+                        True,
+                        label="Source Image Hash Check",
+                        info="Recommended to keep it ON. Processing is faster when Source Image is the same."
+                    )
+                    target_hash_check = gr.Checkbox(
+                        False,
+                        label="Target Image Hash Check",
+                        info="Affects if you use img2img with only 'Swap in source image' option."
+                    )
+
+        args = {
+            'img': img,
+            'enable': enable,
+            'source_faces_index': source_faces_index,
+            'faces_index': faces_index,
+            'model': model,
+            'face_restorer_name': face_restorer_name,
+            'face_restorer_visibility': face_restorer_visibility,
+            'restore_first': restore_first,
+            'upscaler_name': upscaler_name,
+            'upscaler_scale': upscaler_scale,
+            'upscaler_visibility': upscaler_visibility,
+            'console_logging_level': console_logging_level,
+            'gender_source': gender_source,
+            'gender_target': gender_target,
+            'codeformer_weight': codeformer_weight,
+            'source_hash_check': source_hash_check,
+            'target_hash_check': target_hash_check,
+        }
+        return args
+
+    @property
+    def upscaler(self) -> UpscalerData:
+        for upscaler in shared.sd_upscalers:
+            if upscaler.name == self.upscaler_name:
+                return upscaler
+        return None
+
+    @property
+    def face_restorer(self) -> FaceRestoration:
+        for face_restorer in shared.face_restorers:
+            if face_restorer.name() == self.face_restorer_name:
+                return face_restorer
+        return None
+
+    @property
+    def enhancement_options(self) -> EnhancementOptions:
+        return EnhancementOptions(
+            do_restore_first=self.restore_first,
+            scale=self.upscaler_scale,
+            upscaler=self.upscaler,
+            face_restorer=self.face_restorer,
+            upscale_visibility=self.upscaler_visibility,
+            restorer_visibility=self.face_restorer_visibility,
+            codeformer_weight=self.codeformer_weight,
+        )
+
+    def process(self, pp: scripts_postprocessing.PostprocessedImage, **args):
+        if args['enable']:
+            reset_messaged()
+            if check_process_halt():
+                return
+
+            global MODELS_PATH
+            self.source = args['img']
+            self.face_restorer_name = args['face_restorer_name']
+            self.upscaler_scale = args['upscaler_scale']
+            self.upscaler_visibility = args['upscaler_visibility']
+            self.face_restorer_visibility = args['face_restorer_visibility']
+            self.restore_first = args['restore_first']
+            self.upscaler_name = args['upscaler_name']
+            self.model = os.path.join(MODELS_PATH, args['model'])
+            self.console_logging_level = args['console_logging_level']
+            self.gender_source = args['gender_source']
+            self.gender_target = args['gender_target']
+            self.codeformer_weight = args['codeformer_weight']
+            self.source_hash_check = args['source_hash_check']
+            self.target_hash_check = args['target_hash_check']
+            if self.gender_source is None or self.gender_source == "No":
+                self.gender_source = 0
+            if self.gender_target is None or self.gender_target == "No":
+                self.gender_target = 0
+            self.source_faces_index = [
+                int(x) for x in args['source_faces_index'].strip(",").split(",") if x.isnumeric()
+            ]
+            self.faces_index = [
+                int(x) for x in args['faces_index'].strip(",").split(",") if x.isnumeric()
+            ]
+            if len(self.source_faces_index) == 0:
+                self.source_faces_index = [0]
+            if len(self.faces_index) == 0:
+                self.faces_index = [0]
+            if self.source_hash_check is None:
+                self.source_hash_check = True
+            if self.target_hash_check is None:
+                self.target_hash_check = False
+
+            current_job_number = shared.state.job_no + 1
+            job_count = shared.state.job_count
+            if current_job_number == job_count:
+                reset_messaged()
+
+            if self.source is not None:
+                logger.status("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
+                image: Image.Image = pp.image
+                result, output, swapped = swap_face(
+                    self.source,
+                    image,
+                    source_faces_index=self.source_faces_index,
+                    faces_index=self.faces_index,
+                    model=self.model,
+                    enhancement_options=self.enhancement_options,
+                    gender_source=self.gender_source,
+                    gender_target=self.gender_target,
+                    source_hash_check=self.source_hash_check,
+                    target_hash_check=self.target_hash_check,
+                )
+                try:
+                    pp.info["ReActor"] = True
+                    pp.image = result
+                except Exception:
+                    logger.error("Cannot create a result image")
+            else:
+                logger.error("Please provide a source face")
