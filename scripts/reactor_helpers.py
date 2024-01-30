@@ -1,13 +1,45 @@
-import os
+import os, glob, random
 from collections import Counter
 from PIL import Image
 from math import isqrt, ceil
 from typing import List
 import logging
 import hashlib
+import torch
+from safetensors.torch import save_file, safe_open
+from insightface.app.common import Face
 
 from modules.images import FilenameGenerator, get_next_sequence_number
 from modules import shared, script_callbacks
+from scripts.reactor_globals import DEVICE, BASE_PATH, FACE_MODELS_PATH, IS_SDNEXT
+
+try:
+    from modules.paths_internal import models_path
+except:
+    try:
+        from modules.paths import models_path
+    except:
+        model_path = os.path.abspath("models")
+
+MODELS_PATH = None
+
+def set_Device(value):
+    global DEVICE
+    DEVICE = value
+    with open(os.path.join(BASE_PATH, "last_device.txt"), "w") as txt:
+        txt.write(DEVICE)
+
+def get_Device():
+    global DEVICE
+    return DEVICE
+
+def set_SDNEXT():
+    global IS_SDNEXT
+    IS_SDNEXT = True
+
+def get_SDNEXT():
+    global IS_SDNEXT
+    return IS_SDNEXT
 
 def make_grid(image_list: List):
     
@@ -122,3 +154,69 @@ def addLoggingLevel(levelName, levelNum, methodName=None):
 def get_image_md5hash(image: Image.Image):
     md5hash = hashlib.md5(image.tobytes())
     return md5hash.hexdigest()
+
+def save_face_model(face: Face, filename: str) -> None:
+    try:
+        tensors = {
+            "bbox": torch.tensor(face["bbox"]),
+            "kps": torch.tensor(face["kps"]),
+            "det_score": torch.tensor(face["det_score"]),
+            "landmark_3d_68": torch.tensor(face["landmark_3d_68"]),
+            "pose": torch.tensor(face["pose"]),
+            "landmark_2d_106": torch.tensor(face["landmark_2d_106"]),
+            "embedding": torch.tensor(face["embedding"]),
+            "gender": torch.tensor(face["gender"]),
+            "age": torch.tensor(face["age"]),
+        }
+        save_file(tensors, filename)
+        # print(f"Face model has been saved to '{filename}'")
+    except Exception as e:
+        print(f"Error: {e}")
+
+def get_models():
+    global MODELS_PATH
+    models_path_init = os.path.join(models_path, "insightface/*")
+    models = glob.glob(models_path_init)
+    models = [x for x in models if x.endswith(".onnx") or x.endswith(".pth")]
+    models_names = []
+    for model in models:
+        model_path = os.path.split(model)
+        if MODELS_PATH is None:
+            MODELS_PATH = model_path[0]
+        model_name = model_path[1]
+        models_names.append(model_name)
+    return models_names
+
+def load_face_model(filename: str):
+    face = {}
+    model_path = os.path.join(FACE_MODELS_PATH, filename)
+    with safe_open(model_path, framework="pt") as f:
+        for k in f.keys():
+            face[k] = f.get_tensor(k).numpy()
+    return Face(face)
+
+def get_facemodels():
+    models_path = os.path.join(FACE_MODELS_PATH, "*")
+    models = glob.glob(models_path)
+    models = [x for x in models if x.endswith(".safetensors")]
+    return models
+
+def get_model_names(get_models):
+    models = get_models()
+    names = ["None"]
+    for x in models:
+        names.append(os.path.basename(x))
+    return names
+
+def get_images_from_folder(path: str):
+    images_path = os.path.join(path, "*")
+    images = glob.glob(images_path)
+    return [Image.open(x) for x in images if x.endswith(('jpg', 'png', 'jpeg', 'webp', 'bmp'))]
+
+def get_random_image_from_folder(path: str):
+    images = get_images_from_folder(path)
+    random_image_index = random.randint(0, len(images) - 1)
+    return [images[random_image_index]]
+
+def get_images_from_list(imgs: List):
+    return [Image.open(os.path.abspath(x.name)) for x in imgs]

@@ -6,4 +6,5 @@ __pycache__/
 .vscode/
 
 example
-toDo.txt
+*.txt
+!requirements.txt

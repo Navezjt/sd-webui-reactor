@@ -1,7 +1,7 @@
 '''
 Thanks SpenserCai for the original version of the roop api script
 -----------------------------------
---- ReActor External API v1.0.1 ---
+--- ReActor External API v1.0.3 ---
 -----------------------------------
 '''
 import os, glob
@@ -60,7 +60,7 @@ def reactor_api(_: gr.Blocks, app: FastAPI):
         source_faces_index: list[int] = Body([0],title="Comma separated face number(s) from swap-source image"),
         face_index: list[int] = Body([0],title="Comma separated face number(s) for target image (result)"),
         upscaler: str = Body("None",title="Upscaler"),
-        scale: int = Body(1,title="Scale by"),
+        scale: float = Body(1,title="Scale by"),
         upscale_visibility: float = Body(1,title="Upscaler visibility (if scale = 1)"),
         face_restorer: str = Body("None",title="Restore Face: 0 - None; 1 - CodeFormer; 2 - GFPGA"),
         restorer_visibility: float = Body(1,title="Restore visibility value"),
@@ -70,20 +70,28 @@ def reactor_api(_: gr.Blocks, app: FastAPI):
         gender_source: int = Body(0,title="Gender Detection (Source) (0 - No, 1 - Female Only, 2 - Male Only)"),
         gender_target: int = Body(0,title="Gender Detection (Target) (0 - No, 1 - Female Only, 2 - Male Only)"),
         save_to_file: int = Body(0,title="Save Result to file, 0 - No, 1 - Yes"),
-        result_file_path: str = Body("",title="(if 'save_to_file = 1') Result file path")
+        result_file_path: str = Body("",title="(if 'save_to_file = 1') Result file path"),
+        device: str = Body("CPU",title="CPU or CUDA (if you have it)"),
+        mask_face: int = Body(0,title="Face Mask Correction, 1 - True, 0 - False"),
+        select_source: int = Body(0,title="Select Source, 0 - Image, 1 - Face Model, 2 - Source Folder"),
+        face_model: str = Body("None",title="Filename of the face model (from 'models/reactor/faces'), e.g. elena.safetensors"),
+        source_folder: str = Body("",title="The path to the folder containing source faces images"),
+        random_image: int = Body(0,title="Randomly select an image from the path")
     ):
-        s_image = api.decode_base64_to_image(source_image)
+        s_image = api.decode_base64_to_image(source_image) if select_source == 0 else None
         t_image = api.decode_base64_to_image(target_image)
         sf_index = source_faces_index
         f_index = face_index
         gender_s = gender_source
         gender_t = gender_target
         restore_first_bool = True if restore_first == 1 else False
+        mask_face = True if mask_face == 1 else False
+        random_image = False if random_image == 0 else True
         up_options = EnhancementOptions(do_restore_first=restore_first_bool, scale=scale, upscaler=get_upscaler(upscaler), upscale_visibility=upscale_visibility,face_restorer=get_face_restorer(face_restorer),restorer_visibility=restorer_visibility,codeformer_weight=codeformer_weight)
         use_model = get_full_model(model)
         if use_model is None:
             Exception("Model not found")
-        result = swap_face(s_image, t_image, use_model, sf_index, f_index, up_options, gender_s, gender_t)
+        result = swap_face(s_image, t_image, use_model, sf_index, f_index, up_options, gender_s, gender_t, True, True, device, mask_face, select_source, face_model, source_folder, None, random_image)
         if save_to_file == 1:
             if result_file_path == "":
                 result_file_path = default_file_path()

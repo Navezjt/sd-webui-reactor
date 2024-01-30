@@ -8,30 +8,51 @@ import numpy as np
 from PIL import Image
 
 import insightface
+from insightface.app.common import Face
 
-from scripts.reactor_helpers import get_image_md5hash
+from scripts.reactor_globals import FACE_MODELS_PATH
+from scripts.reactor_helpers import (
+    get_image_md5hash, 
+    get_Device, 
+    save_face_model, 
+    load_face_model, 
+    get_images_from_folder,
+    get_random_image_from_folder,
+    get_images_from_list,
+    set_SDNEXT
+)
+from scripts.console_log_patch import apply_logging_patch
+
 from modules.face_restoration import FaceRestoration
 try: # A1111
-    from modules import codeformer_model
+    from modules import codeformer_model, gfpgan_model
 except: # SD.Next
-    from modules.postprocess import codeformer_model
+    from modules.postprocess import codeformer_model, gfpgan_model
+    set_SDNEXT()
 from modules.upscaler import UpscalerData
 from modules.shared import state
 from scripts.reactor_logger import logger
+from reactor_modules.reactor_mask import apply_face_mask
+
 try:
     from modules.paths_internal import models_path
 except:
     try:
         from modules.paths import models_path
     except:
-        model_path = os.path.abspath("models")
+        models_path = os.path.abspath("models")
 
 import warnings
 
 np.warnings = warnings
 np.warnings.filterwarnings('ignore')
 
-providers = ["CPUExecutionProvider"]
+
+DEVICE = get_Device()
+if DEVICE == "CUDA":
+    PROVIDERS = ["CUDAExecutionProvider"]
+else:
+    PROVIDERS = ["CPUExecutionProvider"]
 
 
 @dataclass
@@ -71,20 +92,31 @@ def check_process_halt(msgforced: bool = False):
 
 
 FS_MODEL = None
-CURRENT_FS_MODEL_PATH = None
-
 ANALYSIS_MODEL = None
+MASK_MODEL = None
+
+CURRENT_FS_MODEL_PATH = None
+CURRENT_MASK_MODEL_PATH = None
 
 SOURCE_FACES = None
 SOURCE_IMAGE_HASH = None
 TARGET_FACES = None
 TARGET_IMAGE_HASH = None
+SOURCE_FACES_LIST = []
+SOURCE_IMAGE_LIST_HASH = []
+
+def clear_faces_list():
+    global SOURCE_FACES_LIST, SOURCE_IMAGE_LIST_HASH
+    SOURCE_FACES_LIST = []
+    SOURCE_IMAGE_LIST_HASH = []
+    logger.status("Source Images Hash has been reset (for Multiple or Folder Source)")
+
 
 def getAnalysisModel():
     global ANALYSIS_MODEL
     if ANALYSIS_MODEL is None:
         ANALYSIS_MODEL = insightface.app.FaceAnalysis(
-            name="buffalo_l", providers=providers, root=os.path.join(models_path, "insightface") # note: allowed_modules=['detection', 'genderage']
+            name="buffalo_l", providers=PROVIDERS, root=os.path.join(models_path, "insightface") # note: allowed_modules=['detection', 'genderage']
         )
     return ANALYSIS_MODEL
 
@@ -94,7 +126,7 @@ def getFaceSwapModel(model_path: str):
     global CURRENT_FS_MODEL_PATH
     if CURRENT_FS_MODEL_PATH is None or CURRENT_FS_MODEL_PATH != model_path:
         CURRENT_FS_MODEL_PATH = model_path
-        FS_MODEL = insightface.model_zoo.get_model(model_path, providers=providers)
+        FS_MODEL = insightface.model_zoo.get_model(model_path, providers=PROVIDERS)
 
     return FS_MODEL
 
@@ -113,8 +145,9 @@ def restore_face(image: Image, enhancement_options: EnhancementOptions):
             numpy_image = codeformer_model.codeformer.restore(
                 numpy_image, w=enhancement_options.codeformer_weight
             )
-        else:
-            numpy_image = enhancement_options.face_restorer.restore(numpy_image)
+        else: # GFPGAN:
+            numpy_image = gfpgan_model.gfpgan_fix_faces(numpy_image)
+            # numpy_image = enhancement_options.face_restorer.restore(numpy_image)
         restored_image = Image.fromarray(numpy_image)
         result_image = Image.blend(
             original_image, restored_image, enhancement_options.restorer_visibility
@@ -163,6 +196,28 @@ def enhance_image(image: Image, enhancement_options: EnhancementOptions):
 
     return result_image
 
+def enhance_image_and_mask(image: Image.Image, enhancement_options: EnhancementOptions,target_img_orig:Image.Image,entire_mask_image:Image.Image)->Image.Image:
+    result_image = image
+    
+    if check_process_halt(msgforced=True):
+        return result_image
+    
+    if enhancement_options.do_restore_first:
+        
+        result_image = restore_face(result_image, enhancement_options)
+        result_image = Image.composite(result_image,target_img_orig,entire_mask_image)
+        result_image = upscale_image(result_image, enhancement_options)
+
+    else:
+
+        result_image = upscale_image(result_image, enhancement_options)
+        entire_mask_image = Image.fromarray(cv2.resize(np.array(entire_mask_image),result_image.size, interpolation=cv2.INTER_AREA)).convert("L")
+        result_image = Image.composite(result_image,target_img_orig,entire_mask_image)
+        result_image = restore_face(result_image, enhancement_options)
+
+    return result_image
+
+    
 def get_gender(face, face_index):
     gender = [
         x.sex
@@ -210,15 +265,12 @@ def get_face_age(face, face_index):
         return "None"
     return face_age
 
-# def reget_face_single(img_data: np.ndarray, face, det_size, face_index, gender_source, gender_target):
-#     det_size_half = (det_size[0] // 2, det_size[1] // 2)
-#     return get_face_single(img_data, face, face_index=face_index, det_size=det_size_half, gender_source=gender_source, gender_target=gender_target)
-
 def half_det_size(det_size):
     logger.status("Trying to halve 'det_size' parameter")
     return (det_size[0] // 2, det_size[1] // 2)
 
 def analyze_faces(img_data: np.ndarray, det_size=(640, 640)):
+    logger.info("Applied Execution Provider: %s", PROVIDERS[0])
     face_analyser = copy.deepcopy(getAnalysisModel())
     face_analyser.prepare(ctx_id=0, det_size=det_size)
     return face_analyser.get(img_data)
@@ -278,9 +330,19 @@ def swap_face(
     gender_target: int = 0,
     source_hash_check: bool = True,
     target_hash_check: bool = False,
+    device: str = "CPU",
+    mask_face: bool = False,
+    select_source: int = 0,
+    face_model: str = "None",
+    source_folder: str = "",
+    source_imgs: Union[List, None] = None,
+    random_image: bool = False,
 ):
-    global SOURCE_FACES, SOURCE_IMAGE_HASH, TARGET_FACES, TARGET_IMAGE_HASH
+    global SOURCE_FACES, SOURCE_IMAGE_HASH, TARGET_FACES, TARGET_IMAGE_HASH, PROVIDERS, SOURCE_FACES_LIST, SOURCE_IMAGE_LIST_HASH
+
     result_image = target_img
+
+    PROVIDERS = ["CUDAExecutionProvider"] if device == "CUDA" else ["CPUExecutionProvider"]
     
     if check_process_halt():
         return result_image, [], 0
@@ -300,150 +362,363 @@ def swap_face(
             
             source_img = Image.open(io.BytesIO(img_bytes))
 
-        source_img = cv2.cvtColor(np.array(source_img), cv2.COLOR_RGB2BGR)
         target_img = cv2.cvtColor(np.array(target_img), cv2.COLOR_RGB2BGR)
+
+        target_img_orig = cv2.cvtColor(np.array(target_img), cv2.COLOR_RGB2BGR)
+        entire_mask_image = np.zeros_like(np.array(target_img))
 
         output: List = []
         output_info: str = ""
         swapped = 0
+
+        # *****************
+        # SWAP from FOLDER or MULTIPLE images:
         
-        if source_hash_check:
+        if (select_source == 0 and source_imgs is not None) or (select_source == 2 and (source_folder is not None and source_folder != "")):
 
-            source_image_md5hash = get_image_md5hash(source_img)
+            result = []
 
-            if SOURCE_IMAGE_HASH is None:
-                SOURCE_IMAGE_HASH = source_image_md5hash
-                source_image_same = False
+            if random_image and select_source == 2:
+                source_images = get_random_image_from_folder(source_folder)
+                logger.status("Processing with Random Image from the folder")
             else:
-                source_image_same = True if SOURCE_IMAGE_HASH == source_image_md5hash else False
-                if not source_image_same:
-                    SOURCE_IMAGE_HASH = source_image_md5hash
+                source_images = get_images_from_folder(source_folder) if select_source == 2 else get_images_from_list(source_imgs)
 
-            logger.info("Source Image MD5 Hash = %s", SOURCE_IMAGE_HASH)
-            logger.info("Source Image the Same? %s", source_image_same)
+            if len(source_images) > 0:
+                source_img_ff = []
+                source_faces_ff = []
+                for i, source_image in enumerate(source_images):
 
-            if SOURCE_FACES is None or not source_image_same:
-                logger.status("Analyzing Source Image...")
-                source_faces = analyze_faces(source_img)
-                SOURCE_FACES = source_faces
-            elif source_image_same:
-                logger.status("Using Ready Source Face(s) Model...")
-                source_faces = SOURCE_FACES
+                    source_image = cv2.cvtColor(np.array(source_image), cv2.COLOR_RGB2BGR)
+                    source_img_ff.append(source_image)
 
-        else:
-            logger.status("Analyzing Source Image...")
-            source_faces = analyze_faces(source_img)
+                    if source_hash_check:
 
-        if source_faces is not None:
+                        source_image_md5hash = get_image_md5hash(source_image)
 
-            if target_hash_check:
+                        if len(SOURCE_IMAGE_LIST_HASH) == 0:
+                            SOURCE_IMAGE_LIST_HASH = [source_image_md5hash]
+                            source_image_same = False
+                        elif len(SOURCE_IMAGE_LIST_HASH) == i:
+                            SOURCE_IMAGE_LIST_HASH.append(source_image_md5hash)
+                            source_image_same = False
+                        else:
+                            source_image_same = True if SOURCE_IMAGE_LIST_HASH[i] == source_image_md5hash else False
+                            if not source_image_same:
+                                SOURCE_IMAGE_LIST_HASH[i] = source_image_md5hash
+
+                        logger.info("(Image %s) Source Image MD5 Hash = %s", i, SOURCE_IMAGE_LIST_HASH[i])
+                        logger.info("(Image %s) Source Image the Same? %s", i, source_image_same)
+
+                        if len(SOURCE_FACES_LIST) == 0:
+                            logger.status(f"Analyzing Source Image {i}...")
+                            source_faces = analyze_faces(source_image)
+                            SOURCE_FACES_LIST = [source_faces]
+                        elif len(SOURCE_FACES_LIST) == i and not source_image_same:
+                            logger.status(f"Analyzing Source Image {i}...")
+                            source_faces = analyze_faces(source_image)
+                            SOURCE_FACES_LIST.append(source_faces)
+                        elif len(SOURCE_FACES_LIST) != i and not source_image_same:
+                            logger.status(f"Analyzing Source Image {i}...")
+                            source_faces = analyze_faces(source_image)
+                            SOURCE_FACES_LIST[i] = source_faces
+                        elif source_image_same:
+                            logger.status("(Image %s) Using Hashed Source Face(s) Model...", i)
+                            source_faces = SOURCE_FACES_LIST[i]
+
+                    else:
+                        logger.status(f"Analyzing Source Image {i}...")
+                        source_faces = analyze_faces(source_image)
+
+                    if source_faces is not None:
+                        source_faces_ff.append(source_faces)
             
-                target_image_md5hash = get_image_md5hash(target_img)
+            if len(source_faces_ff) > 0:
 
-                if TARGET_IMAGE_HASH is None:
-                    TARGET_IMAGE_HASH = target_image_md5hash
-                    target_image_same = False
-                else:
-                    target_image_same = True if TARGET_IMAGE_HASH == target_image_md5hash else False
-                    if not target_image_same:
-                        TARGET_IMAGE_HASH = target_image_md5hash
-
-                logger.info("Target Image MD5 Hash = %s", TARGET_IMAGE_HASH)
-                logger.info("Target Image the Same? %s", target_image_same)
+                if target_hash_check:
                 
-                if TARGET_FACES is None or not target_image_same:
+                    target_image_md5hash = get_image_md5hash(target_img)
+
+                    if TARGET_IMAGE_HASH is None:
+                        TARGET_IMAGE_HASH = target_image_md5hash
+                        target_image_same = False
+                    else:
+                        target_image_same = True if TARGET_IMAGE_HASH == target_image_md5hash else False
+                        if not target_image_same:
+                            TARGET_IMAGE_HASH = target_image_md5hash
+
+                    logger.info("Target Image MD5 Hash = %s", TARGET_IMAGE_HASH)
+                    logger.info("Target Image the Same? %s", target_image_same)
+                    
+                    if TARGET_FACES is None or not target_image_same:
+                        logger.status("Analyzing Target Image...")
+                        target_faces = analyze_faces(target_img)
+                        TARGET_FACES = target_faces
+                    elif target_image_same:
+                        logger.status("Using Hashed Target Face(s) Model...")
+                        target_faces = TARGET_FACES
+                
+                else:
                     logger.status("Analyzing Target Image...")
                     target_faces = analyze_faces(target_img)
-                    TARGET_FACES = target_faces
-                elif target_image_same:
-                    logger.status("Using Ready Target Face(s) Model...")
-                    target_faces = TARGET_FACES
+
+                for i,source_faces in enumerate(source_faces_ff):
+
+                    logger.status("(Image %s) Detecting Source Face, Index = %s", i, source_faces_index[0])
+                    source_face, wrong_gender, source_age, source_gender = get_face_single(source_img_ff[i], source_faces, face_index=source_faces_index[0], gender_source=gender_source)
+                    
+                    if source_age != "None" or source_gender != "None":
+                        logger.status("(Image %s) Detected: -%s- y.o. %s", i, source_age, source_gender)
+
+                    if len(source_faces_index) != 0 and len(source_faces_index) != 1 and len(source_faces_index) != len(faces_index):
+                        logger.status("Source Faces must have no entries (default=0), one entry, or same number of entries as target faces.")
+                    
+                    elif source_face is not None:
+
+                        result_image, output, swapped = operate(source_img_ff[i],target_img,target_img_orig,model,source_faces_index,faces_index,source_faces,target_faces,gender_source,gender_target,source_face,wrong_gender,source_age,source_gender,output,swapped,mask_face,entire_mask_image,enhancement_options)
+
+                        result.append(result_image)
+
+                    result = [result_image] if len(result) == 0 else result
+            
+            return result, output, swapped
+        
+        # END
+        # *****************
+        
+        # ***********************
+        # SWAP from IMG or MODEL:
+
+        else:
+        
+            if select_source == 0 and source_img is not None:
+                
+                source_img = cv2.cvtColor(np.array(source_img), cv2.COLOR_RGB2BGR)
+
+                if source_hash_check:
+
+                    source_image_md5hash = get_image_md5hash(source_img)
+
+                    if SOURCE_IMAGE_HASH is None:
+                        SOURCE_IMAGE_HASH = source_image_md5hash
+                        source_image_same = False
+                    else:
+                        source_image_same = True if SOURCE_IMAGE_HASH == source_image_md5hash else False
+                        if not source_image_same:
+                            SOURCE_IMAGE_HASH = source_image_md5hash
+
+                    logger.info("Source Image MD5 Hash = %s", SOURCE_IMAGE_HASH)
+                    logger.info("Source Image the Same? %s", source_image_same)
+
+                    if SOURCE_FACES is None or not source_image_same:
+                        logger.status("Analyzing Source Image...")
+                        source_faces = analyze_faces(source_img)
+                        SOURCE_FACES = source_faces
+                    elif source_image_same:
+                        logger.status("Using Hashed Source Face(s) Model...")
+                        source_faces = SOURCE_FACES
+
+                else:
+                    logger.status("Analyzing Source Image...")
+                    source_faces = analyze_faces(source_img)
+            
+            elif select_source == 1 and (face_model is not None and face_model != "None"):
+                source_face_model = [load_face_model(face_model)]
+                if source_face_model is not None:
+                    source_faces_index = [0]
+                    source_faces = source_face_model                  
+                    logger.status("Using Loaded Source Face Model...")
+                else:
+                    logger.error(f"Cannot load Face Model File: {face_model}.safetensors")
             
             else:
-                logger.status("Analyzing Target Image...")
-                target_faces = analyze_faces(target_img)
+                logger.error("Cannot detect any Source")
+                return result_image, [], 0
 
-            logger.status("Detecting Source Face, Index = %s", source_faces_index[0])
-            source_face, wrong_gender, source_age, source_gender = get_face_single(source_img, source_faces, face_index=source_faces_index[0], gender_source=gender_source)
+            if source_faces is not None:
+
+                if target_hash_check:
+                
+                    target_image_md5hash = get_image_md5hash(target_img)
+
+                    if TARGET_IMAGE_HASH is None:
+                        TARGET_IMAGE_HASH = target_image_md5hash
+                        target_image_same = False
+                    else:
+                        target_image_same = True if TARGET_IMAGE_HASH == target_image_md5hash else False
+                        if not target_image_same:
+                            TARGET_IMAGE_HASH = target_image_md5hash
+
+                    logger.info("Target Image MD5 Hash = %s", TARGET_IMAGE_HASH)
+                    logger.info("Target Image the Same? %s", target_image_same)
+                    
+                    if TARGET_FACES is None or not target_image_same:
+                        logger.status("Analyzing Target Image...")
+                        target_faces = analyze_faces(target_img)
+                        TARGET_FACES = target_faces
+                    elif target_image_same:
+                        logger.status("Using Hashed Target Face(s) Model...")
+                        target_faces = TARGET_FACES
+                
+                else:
+                    logger.status("Analyzing Target Image...")
+                    target_faces = analyze_faces(target_img)
+
+                logger.status("Detecting Source Face, Index = %s", source_faces_index[0])
+                if select_source == 0 and source_img is not None:
+                    source_face, wrong_gender, source_age, source_gender = get_face_single(source_img, source_faces, face_index=source_faces_index[0], gender_source=gender_source)
+                else:
+                    source_face = sorted(source_faces, key=lambda x: x.bbox[0])[source_faces_index[0]]
+                    wrong_gender = 0
+                    source_age = source_face["age"]
+                    source_gender = "Female" if source_face["gender"] == 0 else "Male"
+                
+                if source_age != "None" or source_gender != "None":
+                    logger.status("Detected: -%s- y.o. %s", source_age, source_gender)
+
+                output_info = f"SourceFaceIndex={source_faces_index[0]};Age={source_age};Gender={source_gender}\n"
+                output.append(output_info)
+                
+                if len(source_faces_index) != 0 and len(source_faces_index) != 1 and len(source_faces_index) != len(faces_index):
+                    logger.status("Source Faces must have no entries (default=0), one entry, or same number of entries as target faces.")
+                
+                elif source_face is not None:
+
+                    result_image, output, swapped = operate(source_img,target_img,target_img_orig,model,source_faces_index,faces_index,source_faces,target_faces,gender_source,gender_target,source_face,wrong_gender,source_age,source_gender,output,swapped,mask_face,entire_mask_image,enhancement_options)
+                
+                else:
+                    logger.status("No source face(s) in the provided Index")
+            else:
+                logger.status("No source face(s) found")
+    
+            return result_image, output, swapped
+        
+        # END
+        # **********************
+    
+    return result_image, [], 0
+
+def build_face_model(image: Image.Image, name: str):
+    if image is None:
+        error_msg = "Please load an Image"
+        logger.error(error_msg)
+        return error_msg
+    if name is None:
+        error_msg = "Please filled out the 'Face Model Name' field"
+        logger.error(error_msg)
+        return error_msg
+    apply_logging_patch(1)
+    image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+    logger.status("Building Face Model...")
+    face_model = analyze_faces(image)
+    if face_model is not None and len(face_model) > 0:
+        face_model_path = os.path.join(FACE_MODELS_PATH, name + ".safetensors")
+        save_face_model(face_model[0],face_model_path)
+        logger.status("--Done!--")
+        done_msg = f"Face model has been saved to '{face_model_path}'"
+        logger.status(done_msg)
+        return done_msg
+    else:
+        no_face_msg = "No face found, please try another image"
+        logger.error(no_face_msg)
+        return no_face_msg
+
+
+def operate(
+        source_img,
+        target_img,
+        target_img_orig,
+        model,
+        source_faces_index,
+        faces_index,
+        source_faces,
+        target_faces,
+        gender_source,
+        gender_target,
+        source_face,
+        wrong_gender,
+        source_age,
+        source_gender,
+        output,
+        swapped,
+        mask_face,
+        entire_mask_image,
+        enhancement_options,
+    ):
+    result = target_img
+    face_swapper = getFaceSwapModel(model)
+
+    source_face_idx = 0
+
+    for face_num in faces_index:
+        if check_process_halt():
+            return result_image, [], 0
+        if len(source_faces_index) > 1 and source_face_idx > 0:
+            logger.status("Detecting Source Face, Index = %s", source_faces_index[source_face_idx])
+            source_face, wrong_gender, source_age, source_gender = get_face_single(source_img, source_faces, face_index=source_faces_index[source_face_idx], gender_source=gender_source)
             if source_age != "None" or source_gender != "None":
                 logger.status("Detected: -%s- y.o. %s", source_age, source_gender)
 
-            output_info = f"SourceFaceIndex={source_faces_index[0]};Age={source_age};Gender={source_gender}\n"
+            output_info = f"SourceFaceIndex={source_faces_index[source_face_idx]};Age={source_age};Gender={source_gender}\n"
             output.append(output_info)
 
-            if len(source_faces_index) != 0 and len(source_faces_index) != 1 and len(source_faces_index) != len(faces_index):
-                logger.status("Source Faces must have no entries (default=0), one entry, or same number of entries as target faces.")
-            elif source_face is not None:
+        source_face_idx += 1
+
+        if source_face is not None and wrong_gender == 0:
+            logger.status("Detecting Target Face, Index = %s", face_num)
+            target_face, wrong_gender, target_age, target_gender = get_face_single(target_img, target_faces, face_index=face_num, gender_target=gender_target)
+            if target_age != "None" or target_gender != "None":
+                logger.status("Detected: -%s- y.o. %s", target_age, target_gender)
+
+            output_info = f"TargetFaceIndex={face_num};Age={target_age};Gender={target_gender}\n"
+            output.append(output_info)
             
-                result = target_img
-                face_swapper = getFaceSwapModel(model)
-
-                source_face_idx = 0
-
-                for face_num in faces_index:
-                    if check_process_halt():
-                        return result_image, [], 0
-                    if len(source_faces_index) > 1 and source_face_idx > 0:
-                        logger.status("Detecting Source Face, Index = %s", source_faces_index[source_face_idx])
-                        source_face, wrong_gender, source_age, source_gender = get_face_single(source_img, source_faces, face_index=source_faces_index[source_face_idx], gender_source=gender_source)
-                        if source_age != "None" or source_gender != "None":
-                            logger.status("Detected: -%s- y.o. %s", source_age, source_gender)
-
-                        output_info = f"SourceFaceIndex={source_faces_index[source_face_idx]};Age={source_age};Gender={source_gender}\n"
-                        output.append(output_info)
-
-                    source_face_idx += 1
-
-                    if source_face is not None and wrong_gender == 0:
-                        logger.status("Detecting Target Face, Index = %s", face_num)
-                        target_face, wrong_gender, target_age, target_gender = get_face_single(target_img, target_faces, face_index=face_num, gender_target=gender_target)
-                        if target_age != "None" or target_gender != "None":
-                            logger.status("Detected: -%s- y.o. %s", target_age, target_gender)
-
-                        output_info = f"TargetFaceIndex={face_num};Age={target_age};Gender={target_gender}\n"
-                        output.append(output_info)
-                        
-                        if target_face is not None and wrong_gender == 0:
-                            logger.status("Swapping Source into Target")
-                            result = face_swapper.get(result, target_face, source_face)
-                            swapped += 1
-                        
-                        elif wrong_gender == 1:
-                            wrong_gender = 0
-                            
-                            if source_face_idx == len(source_faces_index):
-                                result_image = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
-                                
-                                if enhancement_options is not None and len(source_faces_index) > 1:
-                                    result_image = enhance_image(result_image, enhancement_options)
-                                
-                                return result_image, output, swapped
-                        
-                        else:
-                            logger.status(f"No target face found for {face_num}")
+            if target_face is not None and wrong_gender == 0:
+                logger.status("Swapping Source into Target")
+                swapped_image = face_swapper.get(result, target_face, source_face)
+                                        
+                if mask_face:
+                    result = apply_face_mask(swapped_image=swapped_image,target_image=result,target_face=target_face,entire_mask_image=entire_mask_image)
+                else:
+                    result = swapped_image
+                swapped += 1
+            
+            elif wrong_gender == 1:
+                wrong_gender = 0
+                
+                if source_face_idx == len(source_faces_index):
+                    result_image = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
                     
-                    elif wrong_gender == 1:
-                        wrong_gender = 0
-                        
-                        if source_face_idx == len(source_faces_index):
-                            result_image = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
-                            
-                            if enhancement_options is not None and len(source_faces_index) > 1:
-                                result_image = enhance_image(result_image, enhancement_options)
-                            
-                            return result_image, output, swapped
+                    if enhancement_options is not None and len(source_faces_index) > 1:
+                        result_image = enhance_image(result_image, enhancement_options)
                     
-                    else:
-                        logger.status(f"No source face found for face number {source_face_idx}.")
-
+                    return result_image, output, swapped
+            
+            else:
+                logger.status(f"No target face found for {face_num}")
+        
+        elif wrong_gender == 1:
+            wrong_gender = 0
+            
+            if source_face_idx == len(source_faces_index):
                 result_image = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
                 
-                if enhancement_options is not None and swapped > 0:
+                if enhancement_options is not None and len(source_faces_index) > 1:
                     result_image = enhance_image(result_image, enhancement_options)
-
-            else:
-                logger.status("No source face(s) in the provided Index")
+                
+                return result_image, output, swapped
+        
         else:
-            logger.status("No source face(s) found")
+            logger.status(f"No source face found for face number {source_face_idx}.")
+
+    result_image = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
+    
+    if enhancement_options is not None and swapped > 0:
+        if mask_face and entire_mask_image is not None:
+            result_image = enhance_image_and_mask(result_image, enhancement_options,Image.fromarray(target_img_orig),Image.fromarray(entire_mask_image).convert("L"))    
+        else:    
+            result_image = enhance_image(result_image, enhancement_options)
+    elif mask_face and entire_mask_image is not None and swapped > 0:
+        result_image = Image.composite(result_image,Image.fromarray(target_img_orig),Image.fromarray(entire_mask_image).convert("L"))
     
     return result_image, output, swapped
