@@ -2,7 +2,7 @@
 
   <img src="https://github.com/Gourieff/Assets/raw/main/sd-webui-reactor/ReActor_logo_NEW_RU.png?raw=true" alt="logo" width="180px"/>
     
-  ![Version](https://img.shields.io/badge/версия-0.6.1_beta2-green?style=for-the-badge&labelColor=darkgreen)
+  ![Version](https://img.shields.io/badge/версия-0.7.0_alpha1-lightgreen?style=for-the-badge&labelColor=darkgreen)
   
   <a href="https://boosty.to/artgourieff" target="_blank">
     <img src="https://lovemet.ru/www/boosty.jpg" width="108" alt="Поддержать проект на Boosty"/>
@@ -38,6 +38,20 @@
 <a name="latestupdate">
 
 ## Что нового в последних обновлениях
+
+### 0.7.0 <sub><sup>ALPHA1
+
+- По многочисленным просьбам появилась возможность строить смешанные модели лиц ("Tools->Face Models->Blend")
+
+<img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/0.7.0-whatsnew-01.jpg?raw=true" alt="0.7.0-whatsnew-01" width="100%"/><img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/0.7.0-whatsnew-02.jpg?raw=true" alt="0.7.0-whatsnew-02" width="100%"/>
+
+- Поддержка CUDA 12 в скрипте установщика для библиотеки ORT-GPU версии 1.17.0
+- Новая вкладка "Detection" с параметрами "Threshold" и "Max Faces"
+
+### 0.6.1 <sub><sup>BETA3
+
+- Опция 'Force Upscale' внутри вкладки 'Upscale': апскейл выполнится, даже если не было обнаружено ни одного лица (FR https://github.com/Gourieff/sd-webui-reactor/issues/116)
+- Отображение имён файлов используемых изображений, когда выбрано несколько изображений или папка (а также режим случайного изображения)
 
 ### 0.6.1 <sub><sup>BETA2
 

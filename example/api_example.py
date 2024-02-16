@@ -49,6 +49,9 @@ args=[
     "C:\PATH_TO_FACES_IMAGES", #24 The path to the folder containing source faces images, don't forger to set #22 to 2
     None, #25 skip it for API
     True, #26 Randomly select an image from the path
+    True, #27 Force Upscale even if no face found
+    0.6, #28 Face Detection Threshold
+    2, #29 Maximum number of faces to detect (0 is unlimited)
 ]
 
 # The args for ReActor can be found by 

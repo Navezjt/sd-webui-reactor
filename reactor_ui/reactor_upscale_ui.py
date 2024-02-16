@@ -9,11 +9,19 @@ def update_upscalers_list(selected: str):
 # TAB UPSCALE
 def show(show_br: bool = True):
     with gr.Tab("Upscale"):
-        restore_first = gr.Checkbox(
-            True,
-            label="1. Restore Face -> 2. Upscale (-Uncheck- if you want vice versa)",
-            info="Postprocessing Order"
-        )
+        with gr.Row():
+            restore_first = gr.Checkbox(
+                True,
+                label="1. Restore Face -> 2. Upscale (-Uncheck- if you want vice versa)",
+                info="Postprocessing Order",
+                scale=2
+            )
+            upscale_force = gr.Checkbox(
+                False,
+                label="Force Upscale",
+                info="Upscale anyway - even if no face found",
+                scale=1
+            )
         with gr.Row():
             upscaler_name = gr.Dropdown(
                 choices=[upscaler.name for upscaler in shared.sd_upscalers],
@@ -36,4 +44,4 @@ def show(show_br: bool = True):
             upscaler_visibility = gr.Slider(
                 0, 1, 1, step=0.1, label="Upscaler Visibility (if scale = 1)"
             )
-    return restore_first, upscaler_name, upscaler_scale, upscaler_visibility
+    return restore_first, upscaler_name, upscaler_scale, upscaler_visibility, upscale_force

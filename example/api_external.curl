@@ -24,5 +24,6 @@ curl -X POST \
     "select_source": 1,
     "face_model": "elena.safetensors",
     "source_folder": "C:/faces",
-    "random_image": 1
+    "random_image": 1,
+    "upscale_force": 1
     }'

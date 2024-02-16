@@ -6,6 +6,7 @@ from typing import List, Union
 import cv2
 import numpy as np
 from PIL import Image
+from scipy import stats
 
 import insightface
 from insightface.app.common import Face
@@ -64,7 +65,12 @@ class EnhancementOptions:
     face_restorer: FaceRestoration = None
     restorer_visibility: float = 0.5
     codeformer_weight: float = 0.5
+    upscale_force: bool = False
 
+@dataclass
+class DetectionOptions:
+    det_thresh: float = 0.5
+    det_maxnum: int = 0
 
 MESSAGED_STOPPED = False
 MESSAGED_SKIPPED = False
@@ -105,12 +111,33 @@ TARGET_IMAGE_HASH = None
 SOURCE_FACES_LIST = []
 SOURCE_IMAGE_LIST_HASH = []
 
+def clear_faces():
+    global SOURCE_FACES, SOURCE_IMAGE_HASH
+    SOURCE_FACES = None
+    SOURCE_IMAGE_HASH = None
+    logger.status("Source Images Hash has been reset (for Single Source or Face Model)")
+
 def clear_faces_list():
     global SOURCE_FACES_LIST, SOURCE_IMAGE_LIST_HASH
     SOURCE_FACES_LIST = []
     SOURCE_IMAGE_LIST_HASH = []
     logger.status("Source Images Hash has been reset (for Multiple or Folder Source)")
 
+def clear_faces_target():
+    global TARGET_FACES, TARGET_IMAGE_HASH
+    TARGET_FACES = None
+    TARGET_IMAGE_HASH = None
+    logger.status("Target Images Hash has been reset")
+
+def clear_faces_all():
+    global SOURCE_FACES, SOURCE_IMAGE_HASH, SOURCE_FACES_LIST, SOURCE_IMAGE_LIST_HASH, TARGET_FACES, TARGET_IMAGE_HASH
+    SOURCE_FACES = None
+    SOURCE_IMAGE_HASH = None
+    TARGET_FACES = None
+    TARGET_IMAGE_HASH = None
+    SOURCE_FACES_LIST = []
+    SOURCE_IMAGE_LIST_HASH = []
+    logger.status("All Images Hash has been reset")
 
 def getAnalysisModel():
     global ANALYSIS_MODEL
@@ -269,13 +296,13 @@ def half_det_size(det_size):
     logger.status("Trying to halve 'det_size' parameter")
     return (det_size[0] // 2, det_size[1] // 2)
 
-def analyze_faces(img_data: np.ndarray, det_size=(640, 640)):
+def analyze_faces(img_data: np.ndarray, det_size=(640, 640), det_thresh=0.5, det_maxnum=0):
     logger.info("Applied Execution Provider: %s", PROVIDERS[0])
     face_analyser = copy.deepcopy(getAnalysisModel())
-    face_analyser.prepare(ctx_id=0, det_size=det_size)
-    return face_analyser.get(img_data)
+    face_analyser.prepare(ctx_id=0, det_thresh=det_thresh, det_size=det_size)
+    return face_analyser.get(img_data, max_num=det_maxnum)
 
-def get_face_single(img_data: np.ndarray, face, face_index=0, det_size=(640, 640), gender_source=0, gender_target=0):
+def get_face_single(img_data: np.ndarray, face, face_index=0, det_size=(640, 640), gender_source=0, gender_target=0, det_thresh=0.5, det_maxnum=0):
 
     buffalo_path = os.path.join(models_path, "insightface/models/buffalo_l.zip")
     if os.path.exists(buffalo_path):
@@ -298,20 +325,20 @@ def get_face_single(img_data: np.ndarray, face, face_index=0, det_size=(640, 640
     if gender_source != 0:
         if len(face) == 0 and det_size[0] > 320 and det_size[1] > 320:
             det_size_half = half_det_size(det_size)
-            return get_face_single(img_data, analyze_faces(img_data, det_size_half), face_index, det_size_half, gender_source, gender_target)
+            return get_face_single(img_data, analyze_faces(img_data, det_size_half, det_thresh, det_maxnum), face_index, det_size_half, gender_source, gender_target, det_thresh, det_maxnum)
         faces, wrong_gender = get_face_gender(face,face_index,gender_source,"Source",gender_detected)
         return faces, wrong_gender, face_age, face_gender
 
     if gender_target != 0:
         if len(face) == 0 and det_size[0] > 320 and det_size[1] > 320:
             det_size_half = half_det_size(det_size)
-            return get_face_single(img_data, analyze_faces(img_data, det_size_half), face_index, det_size_half, gender_source, gender_target)
+            return get_face_single(img_data, analyze_faces(img_data, det_size_half, det_thresh, det_maxnum), face_index, det_size_half, gender_source, gender_target, det_thresh, det_maxnum)
         faces, wrong_gender = get_face_gender(face,face_index,gender_target,"Target",gender_detected)
         return faces, wrong_gender, face_age, face_gender
     
     if len(face) == 0 and det_size[0] > 320 and det_size[1] > 320:
         det_size_half = half_det_size(det_size)
-        return get_face_single(img_data, analyze_faces(img_data, det_size_half), face_index, det_size_half, gender_source, gender_target)
+        return get_face_single(img_data, analyze_faces(img_data, det_size_half, det_thresh, det_maxnum), face_index, det_size_half, gender_source, gender_target, det_thresh, det_maxnum)
 
     try:
         return sorted(face, key=lambda x: x.bbox[0])[face_index], 0, face_age, face_gender
@@ -337,6 +364,7 @@ def swap_face(
     source_folder: str = "",
     source_imgs: Union[List, None] = None,
     random_image: bool = False,
+    detection_options: Union[DetectionOptions, None] = None,
 ):
     global SOURCE_FACES, SOURCE_IMAGE_HASH, TARGET_FACES, TARGET_IMAGE_HASH, PROVIDERS, SOURCE_FACES_LIST, SOURCE_IMAGE_LIST_HASH
 
@@ -379,10 +407,10 @@ def swap_face(
             result = []
 
             if random_image and select_source == 2:
-                source_images = get_random_image_from_folder(source_folder)
-                logger.status("Processing with Random Image from the folder")
+                source_images,source_images_names = get_random_image_from_folder(source_folder)
+                logger.status(f"Processing with Random Image from the folder: {source_images_names[0]}")
             else:
-                source_images = get_images_from_folder(source_folder) if select_source == 2 else get_images_from_list(source_imgs)
+                source_images,source_images_names = get_images_from_folder(source_folder) if select_source == 2 else get_images_from_list(source_imgs)
 
             if len(source_images) > 0:
                 source_img_ff = []
@@ -411,16 +439,16 @@ def swap_face(
                         logger.info("(Image %s) Source Image the Same? %s", i, source_image_same)
 
                         if len(SOURCE_FACES_LIST) == 0:
-                            logger.status(f"Analyzing Source Image {i}...")
-                            source_faces = analyze_faces(source_image)
+                            logger.status(f"Analyzing Source Image {i}: {source_images_names[i]}...")
+                            source_faces = analyze_faces(source_image, det_thresh=detection_options.det_thresh, det_maxnum=detection_options.det_maxnum)
                             SOURCE_FACES_LIST = [source_faces]
                         elif len(SOURCE_FACES_LIST) == i and not source_image_same:
-                            logger.status(f"Analyzing Source Image {i}...")
-                            source_faces = analyze_faces(source_image)
+                            logger.status(f"Analyzing Source Image {i}: {source_images_names[i]}...")
+                            source_faces = analyze_faces(source_image, det_thresh=detection_options.det_thresh, det_maxnum=detection_options.det_maxnum)
                             SOURCE_FACES_LIST.append(source_faces)
                         elif len(SOURCE_FACES_LIST) != i and not source_image_same:
-                            logger.status(f"Analyzing Source Image {i}...")
-                            source_faces = analyze_faces(source_image)
+                            logger.status(f"Analyzing Source Image {i}: {source_images_names[i]}...")
+                            source_faces = analyze_faces(source_image, det_thresh=detection_options.det_thresh, det_maxnum=detection_options.det_maxnum)
                             SOURCE_FACES_LIST[i] = source_faces
                         elif source_image_same:
                             logger.status("(Image %s) Using Hashed Source Face(s) Model...", i)
@@ -428,7 +456,7 @@ def swap_face(
 
                     else:
                         logger.status(f"Analyzing Source Image {i}...")
-                        source_faces = analyze_faces(source_image)
+                        source_faces = analyze_faces(source_image, det_thresh=detection_options.det_thresh, det_maxnum=detection_options.det_maxnum)
 
                     if source_faces is not None:
                         source_faces_ff.append(source_faces)
@@ -452,7 +480,7 @@ def swap_face(
                     
                     if TARGET_FACES is None or not target_image_same:
                         logger.status("Analyzing Target Image...")
-                        target_faces = analyze_faces(target_img)
+                        target_faces = analyze_faces(target_img, det_thresh=detection_options.det_thresh, det_maxnum=detection_options.det_maxnum)
                         TARGET_FACES = target_faces
                     elif target_image_same:
                         logger.status("Using Hashed Target Face(s) Model...")
@@ -460,12 +488,12 @@ def swap_face(
                 
                 else:
                     logger.status("Analyzing Target Image...")
-                    target_faces = analyze_faces(target_img)
+                    target_faces = analyze_faces(target_img, det_thresh=detection_options.det_thresh, det_maxnum=detection_options.det_maxnum)
 
                 for i,source_faces in enumerate(source_faces_ff):
 
                     logger.status("(Image %s) Detecting Source Face, Index = %s", i, source_faces_index[0])
-                    source_face, wrong_gender, source_age, source_gender = get_face_single(source_img_ff[i], source_faces, face_index=source_faces_index[0], gender_source=gender_source)
+                    source_face, wrong_gender, source_age, source_gender = get_face_single(source_img_ff[i], source_faces, face_index=source_faces_index[0], gender_source=gender_source, det_thresh=detection_options.det_thresh, det_maxnum=detection_options.det_maxnum)
                     
                     if source_age != "None" or source_gender != "None":
                         logger.status("(Image %s) Detected: -%s- y.o. %s", i, source_age, source_gender)
@@ -475,7 +503,7 @@ def swap_face(
                     
                     elif source_face is not None:
 
-                        result_image, output, swapped = operate(source_img_ff[i],target_img,target_img_orig,model,source_faces_index,faces_index,source_faces,target_faces,gender_source,gender_target,source_face,wrong_gender,source_age,source_gender,output,swapped,mask_face,entire_mask_image,enhancement_options)
+                        result_image, output, swapped = operate(source_img_ff[i],target_img,target_img_orig,model,source_faces_index,faces_index,source_faces,target_faces,gender_source,gender_target,source_face,wrong_gender,source_age,source_gender,output,swapped,mask_face,entire_mask_image,enhancement_options,detection_options)
 
                         result.append(result_image)
 
@@ -512,7 +540,7 @@ def swap_face(
 
                     if SOURCE_FACES is None or not source_image_same:
                         logger.status("Analyzing Source Image...")
-                        source_faces = analyze_faces(source_img)
+                        source_faces = analyze_faces(source_img, det_thresh=detection_options.det_thresh, det_maxnum=detection_options.det_maxnum)
                         SOURCE_FACES = source_faces
                     elif source_image_same:
                         logger.status("Using Hashed Source Face(s) Model...")
@@ -520,7 +548,7 @@ def swap_face(
 
                 else:
                     logger.status("Analyzing Source Image...")
-                    source_faces = analyze_faces(source_img)
+                    source_faces = analyze_faces(source_img, det_thresh=detection_options.det_thresh, det_maxnum=detection_options.det_maxnum)
             
             elif select_source == 1 and (face_model is not None and face_model != "None"):
                 source_face_model = [load_face_model(face_model)]
@@ -554,7 +582,7 @@ def swap_face(
                     
                     if TARGET_FACES is None or not target_image_same:
                         logger.status("Analyzing Target Image...")
-                        target_faces = analyze_faces(target_img)
+                        target_faces = analyze_faces(target_img, det_thresh=detection_options.det_thresh, det_maxnum=detection_options.det_maxnum)
                         TARGET_FACES = target_faces
                     elif target_image_same:
                         logger.status("Using Hashed Target Face(s) Model...")
@@ -562,11 +590,11 @@ def swap_face(
                 
                 else:
                     logger.status("Analyzing Target Image...")
-                    target_faces = analyze_faces(target_img)
+                    target_faces = analyze_faces(target_img, det_thresh=detection_options.det_thresh, det_maxnum=detection_options.det_maxnum)
 
                 logger.status("Detecting Source Face, Index = %s", source_faces_index[0])
                 if select_source == 0 and source_img is not None:
-                    source_face, wrong_gender, source_age, source_gender = get_face_single(source_img, source_faces, face_index=source_faces_index[0], gender_source=gender_source)
+                    source_face, wrong_gender, source_age, source_gender = get_face_single(source_img, source_faces, face_index=source_faces_index[0], gender_source=gender_source, det_thresh=detection_options.det_thresh, det_maxnum=detection_options.det_maxnum)
                 else:
                     source_face = sorted(source_faces, key=lambda x: x.bbox[0])[source_faces_index[0]]
                     wrong_gender = 0
@@ -584,7 +612,7 @@ def swap_face(
                 
                 elif source_face is not None:
 
-                    result_image, output, swapped = operate(source_img,target_img,target_img_orig,model,source_faces_index,faces_index,source_faces,target_faces,gender_source,gender_target,source_face,wrong_gender,source_age,source_gender,output,swapped,mask_face,entire_mask_image,enhancement_options)
+                    result_image, output, swapped = operate(source_img,target_img,target_img_orig,model,source_faces_index,faces_index,source_faces,target_faces,gender_source,gender_target,source_face,wrong_gender,source_age,source_gender,output,swapped,mask_face,entire_mask_image,enhancement_options,detection_options)
                 
                 else:
                     logger.status("No source face(s) in the provided Index")
@@ -598,7 +626,7 @@ def swap_face(
     
     return result_image, [], 0
 
-def build_face_model(image: Image.Image, name: str):
+def build_face_model(image: Image.Image, name: str, save_model: bool = True):
     if image is None:
         error_msg = "Please load an Image"
         logger.error(error_msg)
@@ -609,19 +637,76 @@ def build_face_model(image: Image.Image, name: str):
         return error_msg
     apply_logging_patch(1)
     image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
-    logger.status("Building Face Model...")
+    if save_model:
+        logger.status("Building Face Model...")
     face_model = analyze_faces(image)
     if face_model is not None and len(face_model) > 0:
-        face_model_path = os.path.join(FACE_MODELS_PATH, name + ".safetensors")
-        save_face_model(face_model[0],face_model_path)
-        logger.status("--Done!--")
-        done_msg = f"Face model has been saved to '{face_model_path}'"
-        logger.status(done_msg)
-        return done_msg
+        if save_model:
+            face_model_path = os.path.join(FACE_MODELS_PATH, name + ".safetensors")
+            save_face_model(face_model[0],face_model_path)
+            logger.status("--Done!--")
+            done_msg = f"Face model has been saved to '{face_model_path}'"
+            logger.status(done_msg)
+            return done_msg
+        else:
+            return face_model[0]
     else:
         no_face_msg = "No face found, please try another image"
         logger.error(no_face_msg)
         return no_face_msg
+
+def blend_faces(images_list: List, name: str, compute_method: int = 0, shape_check: bool = False):
+    faces = []
+    embeddings = []
+    images: List[Image.Image] = []
+    images, images_names = get_images_from_list(images_list)
+    for i,image in enumerate(images):
+        logger.status(f"Building Face Model for {images_names[i]}...")
+        face = build_face_model(image,str(i),save_model=False)
+        if isinstance(face, str):
+            # logger.error(f"No faces found in {images_names[i]}, skipping")
+            continue
+        if shape_check:
+            if i == 0:
+                embedding_shape = face.embedding.shape
+            elif face.embedding.shape != embedding_shape:
+                logger.error(f"Embedding Shape Mismatch for {images_names[i]}, skipping")
+                continue
+        faces.append(face)
+        embeddings.append(face.embedding)
+    if len(faces) > 0:
+        # if shape_check:
+        #     embedding_shape = embeddings[0].shape
+        #     for embedding in embeddings:
+        #         if embedding.shape != embedding_shape:
+        #             logger.error("Embedding Shape Mismatch")
+        #             break
+        compute_method_name = "Mean" if compute_method == 0 else "Median" if compute_method == 1 else "Mode"
+        logger.status(f"Blending with Compute Method {compute_method_name}...")
+        blended_embedding = np.mean(embeddings, axis=0) if compute_method == 0 else np.median(embeddings, axis=0) if compute_method == 1 else stats.mode(embeddings, axis=0)[0].astype(np.float32)
+        blended_face = Face(
+            bbox=faces[0].bbox,
+            kps=faces[0].kps,
+            det_score=faces[0].det_score,
+            landmark_3d_68=faces[0].landmark_3d_68,
+            pose=faces[0].pose,
+            landmark_2d_106=faces[0].landmark_2d_106,
+            embedding=blended_embedding,
+            gender=faces[0].gender,
+            age=faces[0].age
+        )
+        if blended_face is not None:
+            face_model_path = os.path.join(FACE_MODELS_PATH, name + ".safetensors")
+            save_face_model(blended_face,face_model_path)
+            logger.status("--Done!--")
+            done_msg = f"Face model has been saved to '{face_model_path}'"
+            logger.status(done_msg)
+            return done_msg
+        else:
+            no_face_msg = "Something went wrong, please try another set of images"
+            logger.error(no_face_msg)
+            return no_face_msg
+    return "No faces found"
 
 
 def operate(
@@ -644,6 +729,7 @@ def operate(
         mask_face,
         entire_mask_image,
         enhancement_options,
+        detection_options,
     ):
     result = target_img
     face_swapper = getFaceSwapModel(model)
@@ -655,7 +741,7 @@ def operate(
             return result_image, [], 0
         if len(source_faces_index) > 1 and source_face_idx > 0:
             logger.status("Detecting Source Face, Index = %s", source_faces_index[source_face_idx])
-            source_face, wrong_gender, source_age, source_gender = get_face_single(source_img, source_faces, face_index=source_faces_index[source_face_idx], gender_source=gender_source)
+            source_face, wrong_gender, source_age, source_gender = get_face_single(source_img, source_faces, face_index=source_faces_index[source_face_idx], gender_source=gender_source, det_thresh=detection_options.det_thresh, det_maxnum=detection_options.det_maxnum)
             if source_age != "None" or source_gender != "None":
                 logger.status("Detected: -%s- y.o. %s", source_age, source_gender)
 
@@ -666,7 +752,7 @@ def operate(
 
         if source_face is not None and wrong_gender == 0:
             logger.status("Detecting Target Face, Index = %s", face_num)
-            target_face, wrong_gender, target_age, target_gender = get_face_single(target_img, target_faces, face_index=face_num, gender_target=gender_target)
+            target_face, wrong_gender, target_age, target_gender = get_face_single(target_img, target_faces, face_index=face_num, gender_target=gender_target, det_thresh=detection_options.det_thresh, det_maxnum=detection_options.det_maxnum)
             if target_age != "None" or target_gender != "None":
                 logger.status("Detected: -%s- y.o. %s", target_age, target_gender)
 
@@ -713,7 +799,7 @@ def operate(
 
     result_image = Image.fromarray(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
     
-    if enhancement_options is not None and swapped > 0:
+    if (enhancement_options is not None and swapped > 0) or enhancement_options.upscale_force:
         if mask_face and entire_mask_image is not None:
             result_image = enhance_image_and_mask(result_image, enhancement_options,Image.fromarray(target_img_orig),Image.fromarray(entire_mask_image).convert("L"))    
         else:    

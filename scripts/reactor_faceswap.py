@@ -15,20 +15,27 @@ from modules.processing import (
 from modules.face_restoration import FaceRestoration
 from modules.images import save_image
 
-from reactor_ui import ui_main, ui_upscale, ui_tools, ui_settings
+from reactor_ui import (
+    ui_main,
+    ui_upscale,
+    ui_tools,
+    ui_settings,
+    ui_detection,
+)
 from scripts.reactor_logger import logger
 from scripts.reactor_swapper import (
-    EnhancementOptions, 
-    swap_face, 
-    check_process_halt, 
+    EnhancementOptions,
+    DetectionOptions,
+    swap_face,
+    check_process_halt,
     reset_messaged,
 )
 from scripts.reactor_version import version_flag, app_title
 from scripts.console_log_patch import apply_logging_patch
 from scripts.reactor_helpers import (
-    make_grid, 
-    set_Device, 
-    get_SDNEXT
+    make_grid,
+    set_Device,
+    get_SDNEXT,
 )
 from scripts.reactor_globals import SWAPPER_MODELS_PATH #, DEVICE, DEVICE_LIST
 
@@ -65,8 +72,11 @@ class FaceSwapScript(scripts.Script):
             }
             img, imgs, select_source, face_model, source_folder, save_original, mask_face, source_faces_index, gender_source, faces_index, gender_target, face_restorer_name, face_restorer_visibility, codeformer_weight, swap_in_source, swap_in_generated, random_image = ui_main.show(is_img2img=is_img2img, **msgs)
             
+            # TAB DETECTION
+            det_thresh, det_maxnum = ui_detection.show()
+            
             # TAB UPSCALE
-            restore_first, upscaler_name, upscaler_scale, upscaler_visibility = ui_upscale.show()
+            restore_first, upscaler_name, upscaler_scale, upscaler_visibility, upscale_force = ui_upscale.show()
 
             # TAB TOOLS
             ui_tools.show()
@@ -104,6 +114,9 @@ class FaceSwapScript(scripts.Script):
             source_folder,
             imgs,
             random_image,
+            upscale_force,
+            det_thresh,
+            det_maxnum
         ]
 
 
@@ -124,13 +137,21 @@ class FaceSwapScript(scripts.Script):
     @property
     def enhancement_options(self) -> EnhancementOptions:
         return EnhancementOptions(
-            do_restore_first = self.restore_first,
+            do_restore_first=self.restore_first,
             scale=self.upscaler_scale,
             upscaler=self.upscaler,
             face_restorer=self.face_restorer,
             upscale_visibility=self.upscaler_visibility,
             restorer_visibility=self.face_restorer_visibility,
             codeformer_weight=self.codeformer_weight,
+            upscale_force=self.upscale_force
+        )
+    
+    @property
+    def detection_options(self) -> DetectionOptions:
+        return DetectionOptions(
+            det_thresh=self.det_thresh,
+            det_maxnum=self.det_maxnum
         )
 
     def process(
@@ -163,6 +184,9 @@ class FaceSwapScript(scripts.Script):
         source_folder,
         imgs,
         random_image,
+        upscale_force,
+        det_thresh,
+        det_maxnum
     ):
         self.enable = enable
         if self.enable:
@@ -198,6 +222,9 @@ class FaceSwapScript(scripts.Script):
             self.source_folder = source_folder
             self.source_imgs = imgs
             self.random_image = random_image
+            self.upscale_force = upscale_force
+            self.det_thresh=det_thresh
+            self.det_maxnum=det_maxnum
             if self.gender_source is None or self.gender_source == "No":
                 self.gender_source = 0
             if self.gender_target is None or self.gender_target == "No":
@@ -222,6 +249,8 @@ class FaceSwapScript(scripts.Script):
                 self.mask_face = False
             if self.random_image is None:
                 self.random_image = False
+            if self.upscale_force is None:
+                self.upscale_force = False
 
             logger.debug("*** Set Device")
             set_Device(self.device)
@@ -232,7 +261,11 @@ class FaceSwapScript(scripts.Script):
             if ((self.source is not None or self.source_imgs is not None) and self.select_source == 0) or ((self.face_model is not None and self.face_model != "None") and self.select_source == 1) or ((self.source_folder is not None and self.source_folder != "") and self.select_source == 2):
                 logger.debug("*** Log patch")
                 apply_logging_patch(console_logging_level)
+                
                 if isinstance(p, StableDiffusionProcessingImg2Img) and self.swap_in_source:
+
+                    logger.debug("*** Check process")
+
                     logger.status("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
 
                     for i in range(len(p.init_images)):
@@ -256,6 +289,7 @@ class FaceSwapScript(scripts.Script):
                             source_folder = None,
                             source_imgs = None,
                             random_image = False,
+                            detection_options=self.detection_options,
                         )
                         p.init_images[i] = result
                         # result_path = get_image_path(p.init_images[i], p.outpath_samples, "", p.all_seeds[i], p.all_prompts[i], "txt", p=p, suffix="-swapped")
@@ -273,13 +307,15 @@ class FaceSwapScript(scripts.Script):
     def postprocess(self, p: StableDiffusionProcessing, processed: Processed, *args):
         if self.enable:
 
-            logger.debug("*** Check postprocess")
+            logger.debug("*** Check postprocess - before IF")
 
             reset_messaged()
             if check_process_halt():
                 return
 
             if self.save_original or ((self.select_source == 2 and self.source_folder is not None and self.source_folder != "") or (self.select_source == 0 and self.source_imgs is not None and self.source is None)):
+
+                logger.debug("*** Check postprocess - after IF")
 
                 postprocess_run: bool = True
 
@@ -321,6 +357,7 @@ class FaceSwapScript(scripts.Script):
                             source_folder = self.source_folder,
                             source_imgs = self.source_imgs,
                             random_image = self.random_image,
+                            detection_options=self.detection_options,
                         )
 
                         if self.select_source == 2 or (self.select_source == 0 and self.source_imgs is not None and self.source is None):
@@ -367,6 +404,21 @@ class FaceSwapScript(scripts.Script):
                 
                 processed.images = result_images
                 # processed.infotexts = result_info
+            
+            elif self.select_source == 0 and self.source is not None and self.source_imgs is not None:
+
+                logger.debug("*** Check postprocess - after ELIF")
+
+                if self.result is not None:
+                    orig_infotexts : List[str] = processed.infotexts[processed.index_of_first_image:]
+                    processed.images = [self.result]
+                    try:
+                        img_path = save_image(self.result, p.outpath_samples, "", p.all_seeds[0], p.all_prompts[0], "png", info=orig_infotexts[0], p=p, suffix="")
+                    except:
+                        logger.error("Cannot save a result image - please, check SD WebUI Settings (Saving and Paths)")
+                else:
+                    logger.error("Cannot create a result image")
+
     
     def postprocess_batch(self, p, *args, **kwargs):
         if self.enable and not self.save_original:
@@ -406,7 +458,9 @@ class FaceSwapScript(scripts.Script):
                 source_folder = None,
                 source_imgs = None,
                 random_image = False,
+                detection_options=self.detection_options,
             )
+            self.result = result
             try:
                 pp = scripts_postprocessing.PostprocessedImage(result)
                 pp.info = {}
@@ -443,8 +497,11 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             }
             img, imgs, select_source, face_model, source_folder, save_original, mask_face, source_faces_index, gender_source, faces_index, gender_target, face_restorer_name, face_restorer_visibility, codeformer_weight, swap_in_source, swap_in_generated, random_image = ui_main.show(is_img2img=False, show_br=False, **msgs)
             
+            # TAB DETECTION
+            det_thresh, det_maxnum = ui_detection.show()
+            
             # TAB UPSCALE
-            restore_first, upscaler_name, upscaler_scale, upscaler_visibility = ui_upscale.show(show_br=False)
+            restore_first, upscaler_name, upscaler_scale, upscaler_visibility, upscale_force = ui_upscale.show(show_br=False)
                         
             # TAB TOOLS
             ui_tools.show()
@@ -477,6 +534,9 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             'source_folder': source_folder,
             'imgs': imgs,
             'random_image': random_image,
+            'upscale_force': upscale_force,
+            'det_thresh': det_thresh,
+            'det_maxnum': det_maxnum,
         }
         return args
 
@@ -504,6 +564,14 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             upscale_visibility=self.upscaler_visibility,
             restorer_visibility=self.face_restorer_visibility,
             codeformer_weight=self.codeformer_weight,
+            upscale_force=self.upscale_force,
+        )
+    
+    @property
+    def detection_options(self) -> DetectionOptions:
+        return DetectionOptions(
+            det_thresh=self.det_thresh,
+            det_maxnum=self.det_maxnum
         )
 
     def process(self, pp: scripts_postprocessing.PostprocessedImage, **args):
@@ -532,6 +600,9 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             self.source_folder = args['source_folder']
             self.source_imgs = args['imgs']
             self.random_image = args['random_image']
+            self.upscale_force = args['upscale_force']
+            self.det_thresh = args['det_thresh']
+            self.det_maxnum = args['det_maxnum']
             if self.gender_source is None or self.gender_source == "No":
                 self.gender_source = 0
             if self.gender_target is None or self.gender_target == "No":
@@ -550,6 +621,8 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                 self.mask_face = False
             if self.random_image is None:
                 self.random_image = False
+            if self.upscale_force is None:
+                self.upscale_force = False
 
             current_job_number = shared.state.job_no + 1
             job_count = shared.state.job_count
@@ -563,6 +636,9 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
             if (self.source is not None and self.select_source == 0) or ((self.face_model is not None and self.face_model != "None") and self.select_source == 1) or ((self.source_folder is not None and self.source_folder != "") and self.select_source == 2) or ((self.source_imgs is not None and self.source is None) and self.select_source == 0):
 
                 logger.debug("We're here: process() 2")
+
+                if self.source is not None and self.select_source == 0:
+                    self.source_imgs = None
 
                 apply_logging_patch(self.console_logging_level)
                 logger.status("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
@@ -586,6 +662,7 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                     source_folder=self.source_folder,
                     source_imgs=self.source_imgs,
                     random_image=self.random_image,
+                    detection_options=self.detection_options,
                 )
                 if self.select_source == 2 or (self.select_source == 0 and self.source_imgs is not None and self.source is None):
                     if len(result) > 0 and swapped > 0:

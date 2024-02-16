@@ -97,11 +97,14 @@ with open(req_file) as file:
     install_count = 0
     ort = "onnxruntime-gpu"
     import torch
+    cuda_version = None
     try:
         if torch.cuda.is_available():
+            cuda_version = torch.version.cuda
+            print(f"CUDA {cuda_version}")
             if first_run or last_device is None:
                 last_device = "CUDA"
-        elif torch.backends.mps.is_available() or hasattr(torch,'dml'):
+        elif torch.backends.mps.is_available() or hasattr(torch,'dml') or hasattr(torch,'privateuseone'):
             ort = "onnxruntime"
             # to prevent errors when ORT-GPU is installed but we want ORT instead:
             if first_run:
@@ -114,7 +117,11 @@ with open(req_file) as file:
                 last_device = "CPU"
         with open(os.path.join(BASE_PATH, "last_device.txt"), "w") as txt:
             txt.write(last_device)
-        if not is_installed(ort,"1.16.1",False):
+        if cuda_version is not None and float(cuda_version)>=12: # CU12
+            if not is_installed(ort,"1.17.0",False):
+                install_count += 1
+                pip_install(ort,"--extra-index-url", "https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/")
+        elif not is_installed(ort,"1.16.1",False):
             install_count += 1
             pip_install(ort, "-U")
     except Exception as e:

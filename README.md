@@ -2,7 +2,7 @@
 
   <img src="https://github.com/Gourieff/Assets/raw/main/sd-webui-reactor/ReActor_logo_NEW_EN.png?raw=true" alt="logo" width="180px"/>
     
-  ![Version](https://img.shields.io/badge/version-0.6.1_beta2-green?style=for-the-badge&labelColor=darkgreen)
+  ![Version](https://img.shields.io/badge/version-0.7.0_alpha1-lightgreen?style=for-the-badge&labelColor=darkgreen)
   
   <a href="https://boosty.to/artgourieff" target="_blank">
     <img src="https://lovemet.ru/www/boosty.jpg" width="108" alt="Support Me on Boosty"/>
@@ -39,6 +39,20 @@
 <a name="latestupdate">
 
 ## What's new in the latest updates
+
+### 0.7.0 <sub><sup>ALPHA1
+
+- You can now blend faces to build blended face models ("Tools->Face Models->Blend") - due to popular demand
+
+<img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/0.7.0-whatsnew-01.jpg?raw=true" alt="0.7.0-whatsnew-01" width="100%"/><img src="https://github.com/Gourieff/Assets/blob/main/sd-webui-reactor/0.7.0-whatsnew-02.jpg?raw=true" alt="0.7.0-whatsnew-02" width="100%"/>
+
+- CUDA 12 Support in the Installer script for 1.17.0 ORT-GPU library
+- New tab "Detection" with "Threshold" and "Max Faces" parameters
+
+### 0.6.1 <sub><sup>BETA3
+
+- 'Force Upscale' option inside the 'Upscale' tab: ReActor will run the Upscaler even if there's no face is detected (FR https://github.com/Gourieff/sd-webui-reactor/issues/116)
+- ReActor shows filenames of source images in-process when the multiple images mode or the folder mode (random as well) is selected
 
 ### 0.6.1 <sub><sup>BETA2
 

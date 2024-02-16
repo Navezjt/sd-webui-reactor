@@ -209,14 +209,27 @@ def get_model_names(get_models):
     return names
 
 def get_images_from_folder(path: str):
-    images_path = os.path.join(path, "*")
-    images = glob.glob(images_path)
-    return [Image.open(x) for x in images if x.endswith(('jpg', 'png', 'jpeg', 'webp', 'bmp'))]
+    files_path = os.path.join(path, "*")
+    files = glob.glob(files_path)
+    images = []
+    images_names = []
+    for x in files:
+        if x.endswith(('jpg', 'png', 'jpeg', 'webp', 'bmp')):
+            images.append(Image.open(x))
+            images_names.append(os.path.basename(x))
+    return images,images_names
+    # return [Image.open(x) for x in images if x.endswith(('jpg', 'png', 'jpeg', 'webp', 'bmp'))],[os.path.basename(x) for x in images if x.endswith(('jpg', 'png', 'jpeg', 'webp', 'bmp'))]
 
 def get_random_image_from_folder(path: str):
-    images = get_images_from_folder(path)
+    images,names = get_images_from_folder(path)
     random_image_index = random.randint(0, len(images) - 1)
-    return [images[random_image_index]]
+    return [images[random_image_index]],[names[random_image_index]]
 
 def get_images_from_list(imgs: List):
-    return [Image.open(os.path.abspath(x.name)) for x in imgs]
+    images = []
+    images_names = []
+    for x in imgs:
+        images.append(Image.open(os.path.abspath(x.name)))
+        images_names.append(os.path.basename(x.name))
+    return images,images_names
+    # return [Image.open(os.path.abspath(x.name)) for x in imgs],[os.path.basename(x.name) for x in imgs]
