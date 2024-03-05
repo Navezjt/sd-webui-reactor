@@ -1,7 +1,7 @@
 '''
 Thanks SpenserCai for the original version of the roop api script
 -----------------------------------
---- ReActor External API v1.0.5 ---
+--- ReActor External API v1.0.6 ---
 -----------------------------------
 '''
 import os, glob
@@ -16,6 +16,15 @@ import gradio as gr
 
 from scripts.reactor_swapper import EnhancementOptions, swap_face, DetectionOptions
 from scripts.reactor_logger import logger
+
+# XYZ init:
+from scripts.reactor_xyz import run
+try:
+    import modules.script_callbacks as script_callbacks
+    script_callbacks.on_before_ui(run)
+    # script_callbacks.on_app_started(reactor_api)
+except:
+    pass
 
 
 def default_file_path():

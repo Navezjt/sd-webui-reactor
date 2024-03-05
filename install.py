@@ -118,9 +118,10 @@ with open(req_file) as file:
         with open(os.path.join(BASE_PATH, "last_device.txt"), "w") as txt:
             txt.write(last_device)
         if cuda_version is not None and float(cuda_version)>=12: # CU12
-            if not is_installed(ort,"1.17.0",False):
+            if not is_installed(ort,"1.17.1",False):
                 install_count += 1
-                pip_install(ort,"--extra-index-url", "https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/")
+                pip_uninstall("onnxruntime", "onnxruntime-gpu")
+                pip_install(ort,"--extra-index-url","https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-12/pypi/simple/")
         elif not is_installed(ort,"1.16.1",False):
             install_count += 1
             pip_install(ort, "-U")

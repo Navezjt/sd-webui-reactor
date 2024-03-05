@@ -166,13 +166,14 @@ def restore_face(image: Image, enhancement_options: EnhancementOptions):
     
     if enhancement_options.face_restorer is not None:
         original_image = result_image.copy()
-        logger.status("Restoring the face with %s", enhancement_options.face_restorer.name())
         numpy_image = np.array(result_image)
         if enhancement_options.face_restorer.name() == "CodeFormer":
+            logger.status("Restoring the face with %s (weight: %s)", enhancement_options.face_restorer.name(), enhancement_options.codeformer_weight)
             numpy_image = codeformer_model.codeformer.restore(
                 numpy_image, w=enhancement_options.codeformer_weight
             )
         else: # GFPGAN:
+            logger.status("Restoring the face with %s", enhancement_options.face_restorer.name())
             numpy_image = gfpgan_model.gfpgan_fix_faces(numpy_image)
             # numpy_image = enhancement_options.face_restorer.restore(numpy_image)
         restored_image = Image.fromarray(numpy_image)
@@ -554,10 +555,10 @@ def swap_face(
                 source_face_model = [load_face_model(face_model)]
                 if source_face_model is not None:
                     source_faces_index = [0]
-                    source_faces = source_face_model                  
-                    logger.status("Using Loaded Source Face Model...")
+                    source_faces = source_face_model
+                    logger.status(f"Using Loaded Source Face Model: {face_model}")
                 else:
-                    logger.error(f"Cannot load Face Model File: {face_model}.safetensors")
+                    logger.error(f"Cannot load Face Model File: {face_model}")
             
             else:
                 logger.error("Cannot detect any Source")
@@ -626,7 +627,7 @@ def swap_face(
     
     return result_image, [], 0
 
-def build_face_model(image: Image.Image, name: str, save_model: bool = True):
+def build_face_model(image: Image.Image, name: str, save_model: bool = True, det_size=(640, 640)):
     if image is None:
         error_msg = "Please load an Image"
         logger.error(error_msg)
@@ -639,7 +640,12 @@ def build_face_model(image: Image.Image, name: str, save_model: bool = True):
     image = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
     if save_model:
         logger.status("Building Face Model...")
-    face_model = analyze_faces(image)
+    face_model = analyze_faces(image, det_size)
+
+    if len(face_model) == 0:
+        det_size_half = half_det_size(det_size)
+        face_model = analyze_faces(image, det_size_half)
+    
     if face_model is not None and len(face_model) > 0:
         if save_model:
             face_model_path = os.path.join(FACE_MODELS_PATH, name + ".safetensors")
