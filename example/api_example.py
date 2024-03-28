@@ -17,7 +17,7 @@ finally:
     print(im)
 
 img_bytes = io.BytesIO()
-im.save(img_bytes, format='PNG') 
+im.save(img_bytes, format='PNG')
 img_base64 = base64.b64encode(img_bytes.getvalue()).decode('utf-8')
 
 # ReActor arguments:

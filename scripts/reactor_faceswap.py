@@ -651,6 +651,15 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                 logger.status("Working: source face index %s, target face index %s", self.source_faces_index, self.faces_index)
                 # if self.select_source != 2:
                 image: Image.Image = pp.image
+
+                # Extract alpha channel
+                logger.debug(f"image = {image}")
+                if image.mode == 'RGBA':
+                    _, _, _, alpha = image.split()
+                else:
+                    alpha = None
+                logger.debug(f"alpha = {alpha}")
+
                 result, output, swapped = swap_face(
                     self.source,
                     image,
@@ -686,6 +695,13 @@ class FaceSwapScriptExtras(scripts_postprocessing.ScriptPostprocessing):
                 else:
                     try:
                         pp.info["ReActor"] = True
+
+                        if alpha is not None:
+                            logger.debug(f"result = {result}")
+                            result = result.convert("RGBA")
+                            result.putalpha(alpha)
+                            logger.debug(f"result_alpha = {result}")
+
                         pp.image = result
                         logger.status("---Done!---")
                     except Exception:

@@ -12,7 +12,7 @@ except:
     try:
         from modules.paths import models_path
     except:
-        model_path = os.path.abspath("models")
+        models_path = os.path.abspath("models")
 
 
 BASE_PATH = os.path.dirname(os.path.realpath(__file__))
